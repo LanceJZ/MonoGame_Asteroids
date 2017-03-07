@@ -10,12 +10,17 @@ namespace Asteroids
 {
     public class Shot : LineEngine.LineMesh
     {
-        LineEngine.Timer m_Timer;
-        float m_TimerAmount = 0;
+        LineEngine.Timer m_LifeTimer;
 
         public Shot(Game game) : base(game)
         {
-            m_Timer = new LineEngine.Timer(game);
+            m_LifeTimer = new LineEngine.Timer(game);
+        }
+
+        public override void Initialize()
+        {
+            base.Initialize();
+            InitializeLineMesh();
         }
 
         public override void Update(GameTime gameTime)
@@ -23,7 +28,7 @@ namespace Asteroids
             base.Update(gameTime);
             CheckBorders();
 
-            if (m_Timer.SecondsTimer > m_TimerAmount)
+            if (m_LifeTimer.Seconds > m_LifeTimer.Amount)
             {
                 Visible = false;
             }
@@ -31,11 +36,11 @@ namespace Asteroids
 
         public void Spawn(Vector3 position, Vector3 velecity, float timer)
         {
-            m_TimerAmount = timer;
+            m_LifeTimer.Reset();
+            m_LifeTimer.Amount = timer;
             Position = position;
             Velocity = velecity;
             Visible = true;
-            m_Timer.ResetTimer();
         }
 
         public void Reset()
@@ -43,10 +48,8 @@ namespace Asteroids
             Visible = false;
         }
 
-        public void InitializeLineMesh()
+        void InitializeLineMesh()
         {
-            Initialize();
-
             Vector3[] pointPosition = new Vector3[4];
 
             pointPosition[0] = new Vector3(-0.5f, 0.5f, 0);

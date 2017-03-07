@@ -9,13 +9,15 @@ namespace Asteroids.LineEngine
 {
     class Timer : GameComponent
     {
-        private float m_FrameTime;
-        private float m_SecondsTimer;
+        private float m_Seconds = 0;
+        private float m_Amount = 0;
 
-        public float SecondsTimer
+        public float Seconds
         {
-            get { return m_SecondsTimer; }
+            get { return m_Seconds; }
         }
+
+        public float Amount { get => m_Amount; set => m_Amount = value; }
 
         public Timer(Game game) : base(game)
         {
@@ -24,13 +26,12 @@ namespace Asteroids.LineEngine
 
         public override void Update(GameTime gameTime)
         {
-            m_FrameTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
-            m_SecondsTimer += m_FrameTime;
+            m_Seconds += (float)gameTime.ElapsedGameTime.TotalSeconds;
         }
 
-        public void ResetTimer()
+        public void Reset()
         {
-            m_SecondsTimer = 0;
+            m_Seconds = 0;
         }
     }
 }

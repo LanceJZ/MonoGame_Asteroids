@@ -6,32 +6,43 @@ using System.Threading.Tasks;
 
 namespace Asteroids
 {
-    using Services = LineEngine.Services;
-
+    using Serv = LineEngine.Services;
+    using Timer = LineEngine.Timer;
     /// <summary>
     /// After 40,000 points only small UFOs spawn.
     /// A steadily decreasing timer that shortens intervals between saucer spawns on each UFO.
     /// </summary>
     public class Game : Microsoft.Xna.Framework.Game
     {
-        GraphicsDeviceManager graphics;
-
+        GraphicsDeviceManager m_GraphicsDM;
         Player m_Player;
+        UFO m_UFO;
+        Timer m_UFOTimer;
         List<Rock> m_LargeRocks;
         List<Rock> m_MedRocks;
         List<Rock> m_SmallRocks;
+        readonly float m_UFOTimerSeedAmount = 10.15f;
+        int m_UFOCount = 0;
         int m_Wave = 0;
         int m_LargeRockCount = 4;
 
         public Game()
         {
-            graphics = new GraphicsDeviceManager(this);
-            graphics.PreferredBackBufferWidth = 1200;
-            graphics.PreferredBackBufferHeight = 900;
-            graphics.IsFullScreen = false;            
-            graphics.SynchronizeWithVerticalRetrace = false;
+            Vector2 screenSize = new Vector2();
+            m_GraphicsDM = new GraphicsDeviceManager(this);
+            m_GraphicsDM.IsFullScreen = false;            
+            m_GraphicsDM.SynchronizeWithVerticalRetrace = false;
+            m_GraphicsDM.PreferMultiSampling = true;
+            screenSize.X = m_GraphicsDM.PreferredBackBufferWidth = 1200;
+            screenSize.Y = m_GraphicsDM.PreferredBackBufferHeight = 900;
             IsFixedTimeStep = false;
             Content.RootDirectory = "Media";
+            m_Player = new Player(this);
+            m_UFO = new UFO(this);
+            m_UFOTimer = new Timer(this);
+            m_LargeRocks = new List<Rock>();
+            m_MedRocks = new List<Rock>();
+            m_SmallRocks = new List<Rock>();
         }
         /// <summary>
         /// Allows the game to perform any initialization it needs to before starting to run.
@@ -41,16 +52,13 @@ namespace Asteroids
         /// </summary>
         protected override void Initialize()
         {
+            Serv.Initialize(m_GraphicsDM);
+
             base.Initialize();
-            // TODO: Add your initialization logic here
-            LineEngine.Services.Initialize(this, graphics.GraphicsDevice);
 
-            m_Player = new Player(this);
-            m_LargeRocks = new List<Rock>();
-            m_MedRocks = new List<Rock>();
-            m_SmallRocks = new List<Rock>();
-
-            m_Player.InitializeLineMesh();
+            m_UFOTimer.Reset();
+            m_UFOTimer.Amount = m_UFOTimerSeedAmount;
+            m_UFO.Initialize(m_Player);
         }
 
         /// <summary>
@@ -58,7 +66,7 @@ namespace Asteroids
         /// all of your content.
         /// </summary>
         protected override void LoadContent()
-        {            
+        {
         }
 
         /// <summary>
@@ -84,7 +92,8 @@ namespace Asteroids
             CountRocks();
 
             base.Update(gameTime);
-            // TODO: Add your update logic here
+
+            UFOController();
         }
 
         /// <summary>
@@ -93,9 +102,27 @@ namespace Asteroids
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(new Color(new Vector3(0.025f, 0, 0.20f)));
+            GraphicsDevice.Clear(new Color(new Vector3(0.015f, 0, 0.08f)));
 
             base.Draw(gameTime);
+        }
+
+        void UFOController()
+        {
+            if (m_UFOTimer.Seconds > m_UFOTimer.Amount && !m_UFO.Visible)
+            {
+                m_UFOTimer.Amount = Serv.RandomMinMax(m_UFOTimerSeedAmount * 0.5f,
+                    m_UFOTimerSeedAmount + (m_UFOTimerSeedAmount - m_Wave));
+                m_UFO.Spawn(m_UFOCount, m_Wave);
+                m_UFOCount++;
+            }
+
+            if (m_UFO.Done || m_UFO.Hit)
+            {
+                m_UFOTimer.Reset();
+                m_UFO.Visible = false;
+                m_UFO.Done = false;
+            }
         }
 
         void CountRocks()
@@ -183,8 +210,8 @@ namespace Asteroids
                 {
                     int rock = m_LargeRocks.Count;
                     m_LargeRocks.Add(new Rock(this));
-                    m_LargeRocks[rock].InitializeLineMesh();
                     m_LargeRocks[rock].Player = m_Player;
+                    m_LargeRocks[rock].UFO = m_UFO;
                     m_LargeRocks[rock].Spawn();
                     m_LargeRocks[rock].SetRandomEdge();
                 }
@@ -211,8 +238,7 @@ namespace Asteroids
                 {
                     int rock = m_MedRocks.Count;
                     m_MedRocks.Add(new Rock(this));
-                    m_MedRocks[rock].InitializeLineMesh();
-                    m_MedRocks[rock].Spawn(position, 0.5f, 150, 50, m_Player);
+                    m_MedRocks[rock].Spawn(position, 0.5f, 150, 50, m_Player, m_UFO);
                 }
             }
         }
@@ -237,8 +263,7 @@ namespace Asteroids
                 {
                     int rock = m_SmallRocks.Count;
                     m_SmallRocks.Add(new Rock(this));
-                    m_SmallRocks[rock].InitializeLineMesh();
-                    m_SmallRocks[rock].Spawn(position, 0.25f, 300, 100, m_Player);
+                    m_SmallRocks[rock].Spawn(position, 0.25f, 300, 100, m_Player, m_UFO);
                 }
             }
 

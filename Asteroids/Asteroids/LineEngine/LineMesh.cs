@@ -55,7 +55,7 @@ namespace Asteroids.LineEngine
                     pass.Apply();
                 }
 
-                LineEngine.Services.Graphics.DrawUserIndexedPrimitives<VertexPositionColor>(
+                Services.GraphicsDM.GraphicsDevice.DrawUserIndexedPrimitives<VertexPositionColor>(
                     PrimitiveType.LineList, pointList,
                     0,  // vertex buffer offset to add to each element of the index buffer
                     pointList.Length,  // number of vertices in pointList
@@ -63,22 +63,6 @@ namespace Asteroids.LineEngine
                     0,  // first index element to read
                     pointList.Length - 1   // number of primitives to draw
                 );
-            }
-        }
-
-        /// <summary>
-        /// Initializes the line list.
-        /// </summary>
-        private void InitializeLineList()
-        {
-            // Initialize an array of indices of type short.
-            lineListIndices = new short[(pointList.Length * 2) - 2];
-
-            // Populate the array with references to indices in the vertex buffer
-            for (int i = 0; i < pointList.Length - 1; i++)
-            {
-                lineListIndices[i * 2] = (short)(i);
-                lineListIndices[(i * 2) + 1] = (short)(i + 1);
             }
         }
 
@@ -102,7 +86,7 @@ namespace Asteroids.LineEngine
             }
 
             // Initialize the vertex buffer, allocating memory for each vertex.
-            vertexBuffer = new VertexBuffer(LineEngine.Services.Graphics, vertexDeclaration,
+            vertexBuffer = new VertexBuffer(Services.GraphicsDM.GraphicsDevice, vertexDeclaration,
                 pointPosition.Length, BufferUsage.None);
 
             // Set the vertex buffer data to the array of vertices.
@@ -112,15 +96,31 @@ namespace Asteroids.LineEngine
         }
 
         /// <summary>
+        /// Initializes the line list.
+        /// </summary>
+        private void InitializeLineList()
+        {
+            // Initialize an array of indices of type short.
+            lineListIndices = new short[(pointList.Length * 2) - 2];
+
+            // Populate the array with references to indices in the vertex buffer
+            for (int i = 0; i < pointList.Length - 1; i++)
+            {
+                lineListIndices[i * 2] = (short)(i);
+                lineListIndices[(i * 2) + 1] = (short)(i + 1);
+            }
+        }
+
+        /// <summary>
         /// Initializes the effect (loading, parameter setting, and technique selection)
         /// used by the game.
         /// </summary>
         public void InitializeEffect()
         {
-            basicEffect = new BasicEffect(LineEngine.Services.Graphics);
+            basicEffect = new BasicEffect(Services.GraphicsDM.GraphicsDevice);
             basicEffect.VertexColorEnabled = true;
-            basicEffect.View = LineEngine.Services.ViewMatrix;
-            basicEffect.Projection = LineEngine.Services.ProjectionMatrix;
+            basicEffect.View = Services.ViewMatrix;
+            basicEffect.Projection = Services.ProjectionMatrix;
             basicEffect.World = meshMatrix;
         }
 

@@ -1,18 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
 namespace Asteroids
 {
     using Serv = LineEngine.Services;
+    using Timer = LineEngine.Timer;
 
     public class Player : LineEngine.LineMesh
     {
-        LineEngine.Timer m_Timer;
+        Timer m_FlameTimer;
         PlayerFlame m_Flame;
-        float flameTimerAmout = 0.06f;
         Shot[] m_Shots;
         bool m_ShotKeyDown = false;
         bool m_HyperKeyDown = false;
@@ -21,7 +20,7 @@ namespace Asteroids
 
         public Player(Game game) : base(game)
         {
-            m_Timer = new LineEngine.Timer(game);
+            m_FlameTimer = new Timer(game);
             m_Flame = new PlayerFlame(game);
             Shots = new Shot[4];
 
@@ -29,6 +28,13 @@ namespace Asteroids
             {
                 Shots[i] = new Shot(game);
             }
+        }
+
+        public override void Initialize()
+        {
+            base.Initialize();
+            InitializeLineMesh();
+            m_FlameTimer.Amount = 0.06f;
         }
 
         public override void Update(GameTime gameTime)
@@ -47,9 +53,9 @@ namespace Asteroids
             float testX;
             float testY;
 
-            if (m_Timer.SecondsTimer > flameTimerAmout)
+            if (m_FlameTimer.Seconds > m_FlameTimer.Amount)
             {
-                m_Timer.ResetTimer();
+                m_FlameTimer.Reset();
 
                 if (m_Flame.Visible)
                     m_Flame.Visible = false;
@@ -158,33 +164,22 @@ namespace Asteroids
             }
         }
 
-        public void InitializeLineMesh()
+        void InitializeLineMesh()
         {
-            m_Flame.InitializeLineMesh();
-
-            Initialize();
-
             Vector3[] pointPosition = new Vector3[6];
 
-            pointPosition[0] = new Vector3(-11.5f, 8f, 0);//Top back tip.
-            pointPosition[1] = new Vector3(11.5f, 0, 0);//Nose pointing to the left of screen.
-            pointPosition[2] = new Vector3(-11.5f, -8f, 0);//Bottom back tip.
-            pointPosition[3] = new Vector3(-9, -4, 0);//Bottom inside back.
-            pointPosition[4] = new Vector3(-9, 4, 0);//Top inside back.
-            pointPosition[5] = new Vector3(-11.5f, 8f, 0);//Top Back Tip.
+            pointPosition[0] = new Vector3(-13.5f, 8f, 0);//Top back tip.
+            pointPosition[1] = new Vector3(13.5f, 0, 0);//Nose pointing to the left of screen.
+            pointPosition[2] = new Vector3(-13.5f, -9.4f, 0);//Bottom back tip.
+            pointPosition[3] = new Vector3(-10.6f, -4.7f, 0);//Bottom inside back.
+            pointPosition[4] = new Vector3(-10.6f, 4.7f, 0);//Top inside back.
+            pointPosition[5] = new Vector3(-13.5f, 9.4f, 0);//Top Back Tip.
 
             InitializePoints(pointPosition);
 
             Radius = 11.5f;
 
-            for (int i = 0; i < 4; i++)
-            {
-                Shots[i].InitializeLineMesh();
-            }
-
             RotationInRadians = Serv.RandomMinMax(0, (float)Math.PI);
         }
-
-
     }
 }

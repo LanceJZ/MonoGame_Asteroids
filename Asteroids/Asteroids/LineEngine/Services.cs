@@ -11,11 +11,12 @@ namespace Asteroids.LineEngine
     public sealed class Services
     {
         #region Fields
-        private static Services instance = null;
-        private static GraphicsDevice graphics;
-        private static Random randomNumber;
-        private static Matrix viewMatrix;
-        private static Matrix projectionMatrix;
+        private static Services m_Instance = null;
+        private static GraphicsDeviceManager m_GraphicsDM;
+        private static Random m_RandomNumber;
+        private static Matrix m_ViewMatrix;
+        private static Matrix m_ProjectionMatrix;
+        private static Vector2 m_ScreenSize;
         #endregion
         #region Properties
         /// <summary>
@@ -28,33 +29,33 @@ namespace Asteroids.LineEngine
             get
             {
                 //Make sure the Instance is valid
-                if (instance != null)
+                if (m_Instance != null)
                 {
-                    return instance;
+                    return m_Instance;
                 }
 
                 throw new InvalidOperationException("The Engine Services have not been started!");
             }
         }
 
-        public static GraphicsDevice Graphics
+        public static GraphicsDeviceManager GraphicsDM
         {
-            get { return graphics; }
+            get { return m_GraphicsDM; }
         }
 
         public static Random RandomNumber
         {
-            get { return randomNumber; }
+            get { return m_RandomNumber; }
         }
 
         public static Matrix ViewMatrix
         {
-            get { return viewMatrix; }
+            get { return m_ViewMatrix; }
         }
 
         public static Matrix ProjectionMatrix
         {
-            get { return projectionMatrix; }
+            get { return m_ProjectionMatrix; }
         }
 
         /// <summary>
@@ -72,19 +73,15 @@ namespace Asteroids.LineEngine
         /// Returns the window size in pixels, of the height.
         /// </summary>
         /// <returns>int</returns>
-        public static int WindowHeight
-        {
-            get { return graphics.ScissorRectangle.Height; }
-        }
+        public static int WindowHeight { get => m_GraphicsDM.PreferredBackBufferHeight; }
 
         /// <summary>
         /// Returns the window size in pixels, of the width.
         /// </summary>
         /// <returns>int</returns>
-        public static int WindowWidth
-        {
-            get { return graphics.ScissorRectangle.Width; }
-        }
+        public static int WindowWidth { get => m_GraphicsDM.PreferredBackBufferWidth; }
+
+        public static Vector2 ScreenSize { get => m_ScreenSize; set => m_ScreenSize = value; }
         #endregion
 
         #region Constructor
@@ -92,7 +89,7 @@ namespace Asteroids.LineEngine
         /// This is the constructor for the Services
         /// You will note that it is private that means that only the Services can only create itself.
         /// </summary>
-        private Services(Game game)
+        private Services()
         {            
         }
         #endregion
@@ -105,22 +102,21 @@ namespace Asteroids.LineEngine
         /// 
         /// You pass in the game class so you can get information needed.
         /// </summary>
-        /// <param name="game">Reference to the game class.</param>
-        /// <param name="graphicsDevice">Reference to the graphic device.</param>
-        /// <param name="near">Sets the near plane for the camera.</param>
-        /// <param name="far">Sets the far plane of the camera.</param>
-        public static void Initialize(Game game, GraphicsDevice graphicsDevice)
+        /// <param name="graphics">Reference to the graphic device.</param>
+        /// <param name="screenSize">Reference to the size of the screen.</param>
+        public static void Initialize(GraphicsDeviceManager graphics)
         {
             //First make sure there is not already an instance started
-            if (instance == null)
+            if (m_Instance == null)
             {
+                m_GraphicsDM = graphics;
+                m_ScreenSize = new Vector2(graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight);
                 //Create the Engine Services
-                instance = new Services(game);
-                graphics = graphicsDevice;
-                randomNumber = new Random();
-                viewMatrix = Matrix.CreateLookAt(new Vector3(0.0f, 0.0f, 1f), Vector3.Zero, Vector3.Up);
-                projectionMatrix = Matrix.CreateOrthographic((float)graphicsDevice.Viewport.Width,
-                    (float)graphicsDevice.Viewport.Height, 1, 2);
+                m_Instance = new Services();
+                m_RandomNumber = new Random();
+                //Set View Matrix and Projection Matrix
+                m_ViewMatrix = Matrix.CreateLookAt(new Vector3(0.0f, 0.0f, 1f), Vector3.Zero, Vector3.Up);
+                m_ProjectionMatrix = Matrix.CreateOrthographic(m_ScreenSize.X, m_ScreenSize.Y, 1, 2);
 
                 return;
             }
@@ -131,18 +127,6 @@ namespace Asteroids.LineEngine
         public static void Update(GameTime gametime)
         {
         }
-
-        /// <summary>
-        /// Returns a float of the angle in radians derived from two Vector3 passed into it, using only the X and Y.
-        /// </summary>
-        /// <param name="origin">Vector3 of origin</param>
-        /// <param name="target">Vector3 of target</param>
-        /// <returns>Float</returns>
-        public static float AngleFromVectors(Vector3 origin, Vector3 target)
-        {
-            return (float)(Math.Atan2(target.Y - origin.Y, target.X - origin.X));
-        }
-
         #endregion
     }
 }

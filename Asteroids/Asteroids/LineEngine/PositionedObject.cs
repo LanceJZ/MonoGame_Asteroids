@@ -45,8 +45,6 @@ namespace Asteroids.LineEngine
         public PositionedObject(Game game) : base(game)
         {
             game.Components.Add(this);
-            m_MaxWidth = Services.WindowWidth * 0.75f;
-            m_MaxHeight = Services.WindowHeight * 0.95f;
         }
         #endregion
         #region Public Methods
@@ -66,7 +64,14 @@ namespace Asteroids.LineEngine
                 RotationInRadians += RotationVelocity * m_FrameTime;
             }
         }
-        #endregion
+
+        public override void Initialize()
+        {
+            base.Initialize();
+
+            m_MaxWidth = Services.WindowWidth * 0.5f;
+            m_MaxHeight = Services.WindowHeight * 0.5f;
+        }
 
         public virtual void CheckBorders()
         {
@@ -129,8 +134,20 @@ namespace Asteroids.LineEngine
 
         public void SetRandomEdge()
         {
-            Position.X = Services.WindowWidth;
-            Position.Y = Services.RandomMinMax(-Services.WindowHeight, Services.WindowHeight);
+            Position.X = Services.WindowWidth * 0.5f;
+            Position.Y = Services.RandomMinMax(-Services.WindowHeight * 0.45f, Services.WindowHeight * 0.45f);
         }
+
+        /// <summary>
+        /// Returns a float of the angle in radians derived from two Vector3 passed into it, using only the X and Y.
+        /// </summary>
+        /// <param name="origin">Vector3 of origin</param>
+        /// <param name="target">Vector3 of target</param>
+        /// <returns>Float</returns>
+        public static float AngleFromVectors(Vector3 origin, Vector3 target)
+        {
+            return (float)(Math.Atan2(target.Y - origin.Y, target.X - origin.X));
+        }
+        #endregion
     }
 }

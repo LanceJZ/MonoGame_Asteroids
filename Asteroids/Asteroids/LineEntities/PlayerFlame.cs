@@ -14,10 +14,14 @@ namespace Asteroids
         {
         }
 
-        public void InitializeLineMesh()
+        public override void Initialize()
         {
-            Initialize();
+            base.Initialize();
+            InitializeLineMesh();
+        }
 
+        void InitializeLineMesh()
+        {
             Vector3[] pointPosition = new Vector3[4];
 
             pointPosition[0] = new Vector3(-9, -4, 0);//Bottom inside back.
