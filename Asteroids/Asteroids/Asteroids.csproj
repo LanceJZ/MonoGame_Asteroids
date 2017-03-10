@@ -51,13 +51,20 @@
     <Compile Include="LineEngine\Services.cs" />
     <Compile Include="Game.cs" />
     <Compile Include="LineEngine\Timer.cs" />
+    <Compile Include="LineEntities\Dot.cs" />
+    <Compile Include="LineEntities\Explode.cs" />
+    <Compile Include="LineEntities\Line.cs" />
+    <Compile Include="LineEntities\LineExplode.cs" />
     <Compile Include="LineEntities\Player.cs" />
     <Compile Include="LineEntities\PlayerFlame.cs" />
+    <Compile Include="LineEntities\PlayerShip.cs" />
     <Compile Include="LineEntities\Shot.cs" />
     <Compile Include="LineEntities\UFO.cs" />
+    <Compile Include="Number.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="LineEntities\Rock.cs" />
+    <Compile Include="Word.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="MonoGame.Framework, Version=3.5.1.1679, Culture=neutral, processorArchitecture=MSIL">

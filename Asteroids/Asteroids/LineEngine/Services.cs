@@ -13,9 +13,11 @@ namespace Asteroids.LineEngine
         #region Fields
         private static Services m_Instance = null;
         private static GraphicsDeviceManager m_GraphicsDM;
+        private static BasicEffect m_BasicEffect;
         private static Random m_RandomNumber;
         private static Matrix m_ViewMatrix;
         private static Matrix m_ProjectionMatrix;
+        private static Matrix m_WorldMatrix;
         private static Vector2 m_ScreenSize;
         #endregion
         #region Properties
@@ -73,15 +75,41 @@ namespace Asteroids.LineEngine
         /// Returns the window size in pixels, of the height.
         /// </summary>
         /// <returns>int</returns>
-        public static int WindowHeight { get => m_GraphicsDM.PreferredBackBufferHeight; }
+        public static int WindowHeight { get { return m_GraphicsDM.PreferredBackBufferHeight; } }
 
         /// <summary>
         /// Returns the window size in pixels, of the width.
         /// </summary>
         /// <returns>int</returns>
-        public static int WindowWidth { get => m_GraphicsDM.PreferredBackBufferWidth; }
+        public static int WindowWidth { get { return m_GraphicsDM.PreferredBackBufferWidth; } }
 
-        public static Vector2 ScreenSize { get => m_ScreenSize; set => m_ScreenSize = value; }
+        public static Vector2 ScreenSize { get { return m_ScreenSize; } set { m_ScreenSize = value; } }
+
+        public static Matrix WorldMatrix
+        {
+            get
+            {
+                return m_WorldMatrix;
+            }
+
+            set
+            {
+                m_WorldMatrix = value;
+            }
+        }
+
+        public static BasicEffect BasicEffect
+        {
+            get
+            {
+                return m_BasicEffect;
+            }
+
+            set
+            {
+                m_BasicEffect = value;
+            }
+        }
         #endregion
 
         #region Constructor
@@ -95,6 +123,9 @@ namespace Asteroids.LineEngine
         #endregion
 
         #region Public Methods
+        public static void Update(GameTime gametime)
+        {
+        }
         /// <summary>
         /// This is used to start up Panther Engine Services.
         /// It makes sure that it has not already been started if it has been it will throw and exception
@@ -103,7 +134,6 @@ namespace Asteroids.LineEngine
         /// You pass in the game class so you can get information needed.
         /// </summary>
         /// <param name="graphics">Reference to the graphic device.</param>
-        /// <param name="screenSize">Reference to the size of the screen.</param>
         public static void Initialize(GraphicsDeviceManager graphics)
         {
             //First make sure there is not already an instance started
@@ -117,15 +147,64 @@ namespace Asteroids.LineEngine
                 //Set View Matrix and Projection Matrix
                 m_ViewMatrix = Matrix.CreateLookAt(new Vector3(0.0f, 0.0f, 1f), Vector3.Zero, Vector3.Up);
                 m_ProjectionMatrix = Matrix.CreateOrthographic(m_ScreenSize.X, m_ScreenSize.Y, 1, 2);
+                BasicEffect = new BasicEffect(graphics.GraphicsDevice);
+                BasicEffect.VertexColorEnabled = true;
+                BasicEffect.View = m_ViewMatrix;
+                BasicEffect.Projection = m_ProjectionMatrix;
+                BasicEffect.World = WorldMatrix;
+                m_WorldMatrix = Matrix.CreateTranslation(0, 0, 0);
 
                 return;
             }
 
             throw new Exception("The Engine Services have already been started.");
         }
-
-        public static void Update(GameTime gametime)
+        /// <summary>
+        /// Returns a Vector3 direction of travel from angle and magnitude.
+        /// </summary>
+        /// <param name="angle"></param>
+        /// <param name="magnitude"></param>
+        /// <returns>Vector3</returns>
+        public static Vector3 SetVelocity(float angle, float magnitude)
         {
+            Vector3 Vector = new Vector3(0);
+            Vector.Y = (float)(Math.Sin(angle) * magnitude);
+            Vector.X = (float)(Math.Cos(angle) * magnitude);
+            return Vector;
+        }
+
+        /// <summary>
+        /// Returns a float of the angle in radians derived from two Vector3 passed into it, using only the X and Y.
+        /// </summary>
+        /// <param name="origin">Vector3 of origin</param>
+        /// <param name="target">Vector3 of target</param>
+        /// <returns>Float</returns>
+        public static float AngleFromVectors(Vector3 origin, Vector3 target)
+        {
+            return (float)(Math.Atan2(target.Y - origin.Y, target.X - origin.X));
+        }
+
+        public static float RandomRadian()
+        {
+            return Services.RandomMinMax(0, (float)Math.PI * 2);
+        }
+
+        public static Vector3 SetRandomVelocity(float speed)
+        {
+            float rad = RandomRadian();
+            float amt = Services.RandomMinMax(speed * 0.15f, speed);
+            return new Vector3((float)Math.Cos(rad) * amt, (float)Math.Sin(rad) * amt, 0);
+        }
+
+        public static Vector3 SetRandomVelocity(float speed, float radianDirection)
+        {
+            float amt = Services.RandomMinMax(speed * 0.15f, speed);
+            return new Vector3((float)Math.Cos(radianDirection) * amt, (float)Math.Sin(radianDirection) * amt, 0);
+        }
+
+        public static Vector3 SetRandomEdge()
+        {
+            return new Vector3(WindowWidth * 0.5f, RandomMinMax(-Services.WindowHeight * 0.45f, Services.WindowHeight * 0.45f), 0);
         }
         #endregion
     }

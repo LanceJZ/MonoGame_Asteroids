@@ -8,20 +8,54 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace Asteroids
 {
-    using serv = LineEngine.Services;
+    using Serv = LineEngine.Services;
 
     class Rock : LineEngine.LineMesh
     {
         Player m_Player;
         UFO m_UFO;
+        Explode m_Explosion;
         int m_Points = 20;
         float m_Speed = 75;
+        bool m_ExplosionDone;
 
-        public Player Player { set => m_Player = value; }
-        public UFO UFO { set => m_UFO = value; }
+        public Player Player
+        {
+            get
+            {
+                return m_Player;
+            }
+
+            set
+            {
+                m_Player = value;
+            }
+        }
+
+        public UFO UFO
+        {
+            get
+            {
+                return m_UFO;
+            }
+
+            set
+            {
+                m_UFO = value;
+            }
+        }
+
+        public bool ExplosionDone
+        {
+            get
+            {
+                return m_Explosion.Active;
+            }
+        }
 
         public Rock(Game game) : base(game)
         {
+            m_Explosion = new Explode(game);
         }
 
         public override void Initialize()
@@ -42,7 +76,7 @@ namespace Asteroids
 
         void InitializeLineMesh()
         {
-            int rockType = (int)serv.RandomMinMax(0, 3.99f);
+            int rockType = (int)Serv.RandomMinMax(0, 3.99f);
 
             switch (rockType)
             {
@@ -63,26 +97,43 @@ namespace Asteroids
 
         void CheckCollusions()
         {
+            if (Player.Visible)
+            {
+                if (CirclesIntersect(Player.Position, Player.Radius))
+                {
+                    Explode();
+                    Player.Hit = true;
+                    Player.SetScore(m_Points);
+                }
+            }
+
             for (int i = 0; i < 4; i++)
             {
-                if (m_Player.Shots[i].Visible)
+                if (Player.Shots[i].Visible)
                 {
-                    if (CirclesIntersect(m_Player.Shots[i].Position, m_Player.Shots[i].Radius))
+                    if (CirclesIntersect(Player.Shots[i].Position, Player.Shots[i].Radius))
                     {
-                        Hit = true;
-                        m_Player.Shots[i].Visible = false;
+                        Explode();
+                        Player.Shots[i].Visible = false;
+                        Player.SetScore(m_Points);
                     }
                 }
             }
 
-            if (m_UFO.Visible)
+            if (UFO.Visible)
             {
-                if (m_UFO.Shot.Visible)
+                if (CirclesIntersect(UFO.Position, UFO.Radius))
                 {
-                    if (CirclesIntersect(m_UFO.Shot.Position, m_UFO.Shot.Radius))
+                    Explode();
+                    UFO.Explode();
+                }
+
+                if (UFO.Shot.Visible)
+                {
+                    if (CirclesIntersect(UFO.Shot.Position, UFO.Shot.Radius))
                     {
-                        Hit = true;
-                        m_UFO.Shot.Visible = false;
+                        Explode();
+                        UFO.Shot.Visible = false;
                     }
                 }
             }
@@ -94,8 +145,8 @@ namespace Asteroids
             Radius = Radius * scale;
             m_Points = points;
             m_Speed = speed;
-            m_Player = player;
-            m_UFO = ufo;
+            Player = player;
+            UFO = ufo;
             Spawn(position);
         }
 
@@ -108,8 +159,14 @@ namespace Asteroids
         public void Spawn()
         {
             Visible = true;
-            SetRandomVelocity(m_Speed);
-            GameOver = m_Player.GameOver;
+            Velocity = Serv.SetRandomVelocity(m_Speed);
+            GameOver = Player.GameOver;
+        }
+
+        void Explode()
+        {
+            m_Explosion.Spawn(Position, Radius);
+            Hit = true;
         }
 
         void RockOne()

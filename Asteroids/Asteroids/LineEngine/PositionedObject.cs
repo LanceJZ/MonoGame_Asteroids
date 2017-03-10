@@ -11,6 +11,7 @@ namespace Asteroids.LineEngine
         private float m_FrameTime;
         // Doing these as fields is almost twice as fast as if they were properties. 
         // Also, sense XYZ are fields they do not get data binned as a property.
+        Game m_Game;
         public Vector3 Position;
         public Vector3 Acceleration;
         public Vector3 Velocity;
@@ -25,26 +26,151 @@ namespace Asteroids.LineEngine
         bool m_ExplosionActive = false;
         bool m_Pause = false;
         bool m_GameOver = false;
-
+        bool m_Moveable = true;
+        #endregion
+        #region Properties
         public float FrameTime { get { return m_FrameTime; } }
-        public float RotationInRadians { get => m_RotationInRadians; set => m_RotationInRadians = value; }
-        public float ScalePercent { get => m_ScalePercent; set => m_ScalePercent = value; }
-        public float RotationVelocity { get => m_RotationVelocity; set => m_RotationVelocity = value; }
-        public float RotationAcceleration { get => m_RotationAcceleration; set => m_RotationAcceleration = value; }
-        public float Radius { get => m_Radius; set => m_Radius = value; }
-        public bool Hit { get => m_Hit; set => m_Hit = value; }
-        public bool Pause { get => m_Pause; set => m_Pause = value; }
-        public bool GameOver { get => m_GameOver; set => m_GameOver = value; }
-        public bool ExplosionActive { get => m_ExplosionActive;}
+
+        public float RotationInRadians
+        {
+            get
+            {
+                return m_RotationInRadians;
+            }
+
+            set
+            {
+                m_RotationInRadians = value;
+            }
+        }
+
+        public float ScalePercent
+        {
+            get
+            {
+                return m_ScalePercent;
+            }
+
+            set
+            {
+                m_ScalePercent = value;
+            }
+        }
+
+        public float RotationVelocity
+        {
+            get
+            {
+                return m_RotationVelocity;
+            }
+
+            set
+            {
+                m_RotationVelocity = value;
+            }
+        }
+
+        public float RotationAcceleration
+        {
+            get
+            {
+                return m_RotationAcceleration;
+            }
+
+            set
+            {
+                m_RotationAcceleration = value;
+            }
+        }
+
+        public float Radius
+        {
+            get
+            {
+                return m_Radius;
+            }
+
+            set
+            {
+                m_Radius = value;
+            }
+        }
+
+        public bool Hit
+        {
+            get
+            {
+                return m_Hit;
+            }
+
+            set
+            {
+                m_Hit = value;
+            }
+        }
+
+        public bool ExplosionActive
+        {
+            get
+            {
+                return m_ExplosionActive;
+            }
+
+            set
+            {
+                m_ExplosionActive = value;
+            }
+        }
+
+        public bool Pause
+        {
+            get
+            {
+                return m_Pause;
+            }
+
+            set
+            {
+                m_Pause = value;
+            }
+        }
+
+        public bool GameOver
+        {
+            get
+            {
+                return m_GameOver;
+            }
+
+            set
+            {
+                m_GameOver = value;
+            }
+        }
+
+        public bool Moveable
+        {
+            get
+            {
+                return m_Moveable;
+            }
+
+            set
+            {
+                m_Moveable = value;
+            }
+        }
+
         #endregion
         #region Constructor
         /// <summary>
-        /// This gets the Positioned Object ready for use, initializing all the fields.
+        /// This is the constructor that gets the Positioned Object ready for use and adds it to the Drawable Components list.
         /// </summary>
         /// <param name="game">The game class</param>
         public PositionedObject(Game game) : base(game)
         {
             game.Components.Add(this);
+            m_Game = game;
         }
         #endregion
         #region Public Methods
@@ -54,7 +180,7 @@ namespace Asteroids.LineEngine
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         public override void Update(GameTime gameTime)
         {
-            if (Visible)
+            if (Visible && Moveable)
             {
                 base.Update(gameTime);
                 m_FrameTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
@@ -71,6 +197,11 @@ namespace Asteroids.LineEngine
 
             m_MaxWidth = Services.WindowWidth * 0.5f;
             m_MaxHeight = Services.WindowHeight * 0.5f;
+        }
+
+        public void Remove()
+        {
+            m_Game.Components.Remove(this);
         }
 
         public virtual void CheckBorders()
@@ -98,55 +229,6 @@ namespace Asteroids.LineEngine
                 return true;
 
             return false;
-        }
-
-        public float RandomRadian()
-        {
-            return Services.RandomMinMax(0, (float)Math.PI * 2);
-        }
-
-        /// <summary>
-        /// Returns a Vector3 direction of travel from angle and magnitude.
-        /// </summary>
-        /// <param name="angle"></param>
-        /// <param name="magnitude"></param>
-        /// <returns>Vector3</returns>
-        public static Vector3 SetVelocity(float angle, float magnitude)
-        {
-            Vector3 Vector = new Vector3(0);
-            Vector.Y = (float)(Math.Sin(angle) * magnitude);
-            Vector.X = (float)(Math.Cos(angle) * magnitude);
-            return Vector;
-        }
-
-        public void SetRandomVelocity(float speed)
-        {
-            float rad = RandomRadian();
-            float amt = Services.RandomMinMax(speed * 0.15f, speed);
-            Velocity = new Vector3((float)Math.Cos(rad) * amt, (float)Math.Sin(rad) * amt, 0);
-        }
-
-        public void SetRandomVelocity(float speed, float radianDirection)
-        {            
-            float amt = Services.RandomMinMax(speed * 0.15f, speed);
-            Velocity = new Vector3((float)Math.Cos(radianDirection) * amt, (float)Math.Sin(radianDirection) * amt, 0);
-        }
-
-        public void SetRandomEdge()
-        {
-            Position.X = Services.WindowWidth * 0.5f;
-            Position.Y = Services.RandomMinMax(-Services.WindowHeight * 0.45f, Services.WindowHeight * 0.45f);
-        }
-
-        /// <summary>
-        /// Returns a float of the angle in radians derived from two Vector3 passed into it, using only the X and Y.
-        /// </summary>
-        /// <param name="origin">Vector3 of origin</param>
-        /// <param name="target">Vector3 of target</param>
-        /// <returns>Float</returns>
-        public static float AngleFromVectors(Vector3 origin, Vector3 target)
-        {
-            return (float)(Math.Atan2(target.Y - origin.Y, target.X - origin.X));
         }
         #endregion
     }

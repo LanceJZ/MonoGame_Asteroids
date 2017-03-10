@@ -9,12 +9,13 @@ namespace Asteroids
     /// <summary>
     /// As the player's score increases, the angle range of the shots from the small saucer diminishes
     /// until the saucer fires extremely accurately.
-    /// The small saucer will fire immediately when spawned. (Revision 3 of orginal arcade.)
+    /// The small saucer will fire immediately when spawned. (Revision 3 of original arcade.)
     /// </summary>
     public class UFO : LineEngine.LineMesh
     {
         Player m_Player;
         Shot m_Shot;
+        Explode m_Explosion;
         Timer m_ShotTimer;
         Timer m_VectorTimer;
         float m_Speed = 66;
@@ -23,15 +24,40 @@ namespace Asteroids
         bool m_SmallSoucer;
         bool m_Done;
 
-        public int PlayerScore { set => m_PlayerScore = value; }
-        public bool Done { get => m_Done; set => m_Done = value; }
-        public Shot Shot { get => m_Shot; set => m_Shot = value; }
+        public int PlayerScore { set { m_PlayerScore = value; } }
+
+        public bool Done
+        {
+            get
+            {
+                return m_Done;
+            }
+
+            set
+            {
+                m_Done = value;
+            }
+        }
+
+        public Shot Shot
+        {
+            get
+            {
+                return m_Shot;
+            }
+
+            set
+            {
+                m_Shot = value;
+            }
+        }
 
         public UFO(Game game) : base(game)
         {
             m_ShotTimer = new Timer(game);
             m_VectorTimer = new Timer(game);
-            Shot = new Shot(game);
+            m_Shot = new Shot(game);
+            m_Explosion = new Explode(game);
         }
 
         public void Initialize(Player player)
@@ -54,21 +80,21 @@ namespace Asteroids
         {
             Vector3[] pointPosition = new Vector3[12];
 
-            pointPosition[0] = new Vector3(8.2f, 4.7f, 0);// Upper right
-            pointPosition[1] = new Vector3(22.3f, -4.7f, 0);// Lower Left
-            pointPosition[2] = new Vector3(9.4f, -12.9f, 0);// Bottom Right
-            pointPosition[3] = new Vector3(-9.4f, -12.9f, 0);// Bottom Left
-            pointPosition[4] = new Vector3(-22.3f, -4.7f, 0);// Upper Left
-            pointPosition[5] = new Vector3(-8.2f, 4.7f, 0);// Lower left
-            pointPosition[6] = new Vector3(-3.5f, 12.9f, 0);// Left Top
-            pointPosition[7] = new Vector3(3.5f, 12.9f, 0);// Right Top
-            pointPosition[8] = new Vector3(8.2f, 4.7f, 0); // Upper right
-            pointPosition[9] = new Vector3(-8.2f, 4.7f, 0);// Upper left
-            pointPosition[10] = new Vector3(-22.3f, -4.7f, 0);// Lower Left
-            pointPosition[11] = new Vector3(22.3f, -4.7f, 0);// Lower Right
+            pointPosition[0] = new Vector3(8.2f, 4.7f, 0);// Upper left
+            pointPosition[1] = new Vector3(22.3f, -4.7f, 0);// Lower inside Left
+            pointPosition[2] = new Vector3(9.4f, -12.9f, 0);// Bottom left
+            pointPosition[3] = new Vector3(-9.4f, -12.9f, 0);// Bottom right
+            pointPosition[4] = new Vector3(-22.3f, -4.7f, 0);// Upper right
+            pointPosition[5] = new Vector3(-8.2f, 4.7f, 0);// Lower inside right
+            pointPosition[6] = new Vector3(-3.5f, 12.9f, 0);// Right Top
+            pointPosition[7] = new Vector3(3.5f, 12.9f, 0);// Left Top
+            pointPosition[8] = new Vector3(8.2f, 4.7f, 0); // Upper inside right
+            pointPosition[9] = new Vector3(-8.2f, 4.7f, 0);// Upper inside left
+            pointPosition[10] = new Vector3(-22.3f, -4.7f, 0);// Lower inside left
+            pointPosition[11] = new Vector3(22.3f, -4.7f, 0);// Lower inside Right
 
             InitializePoints(pointPosition);
-            Radius = 19;
+            Radius = 22.3f;
         }
 
         public override void Update(GameTime gameTime)
@@ -80,19 +106,20 @@ namespace Asteroids
 
                 if (Position.X > Serv.WindowWidth * 0.5f || Position.X < -Serv.WindowWidth * 0.5f)
                 {
-                    m_Done = true;
+                    Done = true;
                 }
 
                 CheckBorders();
                 TimeToChangeVectorYet();
                 TimeToShotYet();
+                CheckColusion();
             }
         }
 
         public void Spawn(int SpawnCount, int Wave)
         {
             Visible = true;
-            m_Done = false;
+            Done = false;
             Hit = false;
             m_ShotTimer.Reset();
             m_VectorTimer.Reset();
@@ -126,6 +153,37 @@ namespace Asteroids
             }            
         }
 
+        public void Explode()
+        {
+            m_Explosion.Spawn(Position, Radius);
+            Hit = true;
+        }
+
+        void CheckColusion()
+        {
+            if (m_Player.Visible)
+            {
+                if (CirclesIntersect(m_Player.Position, m_Player.Radius))
+                {
+                    Explode();
+                    m_Player.Hit = true;
+                }
+            }
+
+            for (int i = 0; i < 4; i++)
+            {
+                if (m_Player.Shots[i].Visible)
+                {
+                    if (CirclesIntersect(m_Player.Shots[i].Position, m_Player.Shots[i].Radius))
+                    {
+                        m_Player.Shots[i].Visible = false;
+                        m_Player.SetScore(m_Points);
+                        Explode();
+                    }
+                }
+            }
+        }
+
         void TimeToShotYet()
         {
             if (m_ShotTimer.Seconds > m_ShotTimer.Amount)
@@ -152,16 +210,16 @@ namespace Asteroids
             float rad = 0;
 
             if (!m_SmallSoucer)
-                rad = RandomRadian();
+                rad = Serv.RandomRadian();
             else
             {
                 //Adjust according to score.
-                rad = AngleFromVectors(Position, m_Player.Position) + Serv.RandomMinMax(-0.1f, 0.1f);
+                rad = Serv.AngleFromVectors(Position, m_Player.Position) + Serv.RandomMinMax(-0.1f, 0.1f);
             }
 
-            Vector3 dir = SetVelocity(rad, speed);
-            Vector3 offset = SetVelocity(rad, Radius);
-            Shot.Spawn(Position + offset, dir + Velocity * 0.25f, 1.15f);
+            Vector3 dir = Serv.SetVelocity(rad, speed);
+            Vector3 offset = Serv.SetVelocity(rad, Radius);
+            m_Shot.Spawn(Position + offset, dir + Velocity * 0.25f, 1.15f);
         }
 
         void ChangeVector()

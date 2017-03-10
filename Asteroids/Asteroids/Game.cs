@@ -78,6 +78,18 @@ namespace Asteroids
             // TODO: Unload any non ContentManager content here
         }
 
+
+        /// <summary>
+        /// Executed after initialization is complete
+        /// </summary>
+        protected override void BeginRun()
+        {
+            base.BeginRun();
+
+            m_Player.BeginRun();
+            m_Player.UFO = m_UFO;
+        }
+
         /// <summary>
         /// Allows the game to run logic such as updating the world,
         /// checking for collisions, gathering input, and playing audio.
@@ -89,6 +101,15 @@ namespace Asteroids
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 #endif
+            if (m_Player.GameOver)
+            {
+                if (Keyboard.GetState().IsKeyDown(Keys.N))
+                {
+                    m_Player.GameOver = false;
+                    NewGame();
+                }
+            }
+
             CountRocks();
 
             base.Update(gameTime);
@@ -107,6 +128,30 @@ namespace Asteroids
             base.Draw(gameTime);
         }
 
+        void NewGame()
+        {
+            m_Player.NewGame();
+            ResetUFO();
+
+            for (int i = 0; i < m_LargeRocks.Count; i++)
+            {
+                m_LargeRocks[i].Visible = false;
+            }
+
+            for (int i = 0; i < m_MedRocks.Count; i++)
+            {
+                m_MedRocks[i].Visible = false;
+            }
+
+            for (int i = 0; i < m_SmallRocks.Count; i++)
+            {
+                m_SmallRocks[i].Visible = false;
+            }
+
+            m_Wave = 0;            
+            SpawnLargeRocks(m_LargeRockCount = 4);
+        }
+
         void UFOController()
         {
             if (m_UFOTimer.Seconds > m_UFOTimer.Amount && !m_UFO.Visible)
@@ -119,10 +164,16 @@ namespace Asteroids
 
             if (m_UFO.Done || m_UFO.Hit)
             {
-                m_UFOTimer.Reset();
-                m_UFO.Visible = false;
-                m_UFO.Done = false;
+                ResetUFO();
             }
+        }
+
+        void ResetUFO()
+        {
+            m_UFOTimer.Reset();
+            m_UFO.Visible = false;
+            m_UFO.Done = false;
+            m_UFO.Hit = false;
         }
 
         void CountRocks()
@@ -201,7 +252,7 @@ namespace Asteroids
                     {
                         spawnNewRock = false;
                         rock.Spawn();
-                        rock.SetRandomEdge();
+                        rock.Position = Serv.SetRandomEdge();
                         break;
                     }
                 }
@@ -213,7 +264,7 @@ namespace Asteroids
                     m_LargeRocks[rock].Player = m_Player;
                     m_LargeRocks[rock].UFO = m_UFO;
                     m_LargeRocks[rock].Spawn();
-                    m_LargeRocks[rock].SetRandomEdge();
+                    m_LargeRocks[rock].Position = Serv.SetRandomEdge();
                 }
             }
         }

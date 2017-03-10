@@ -8,21 +8,62 @@ namespace Asteroids
     using Serv = LineEngine.Services;
     using Timer = LineEngine.Timer;
 
-    public class Player : LineEngine.LineMesh
+    public class Player : LineEngine.PositionedObject
     {
         Timer m_FlameTimer;
         PlayerFlame m_Flame;
+        PlayerShip m_Ship;
+        List<PlayerShip> m_ShipLives;
         Shot[] m_Shots;
+        UFO m_UFO;
+        Number m_ScoreHUD;
+        Number m_HiScoreHUD;
+        int m_Score;
+        int m_HiScore;
+        int m_Lives;
         bool m_ShotKeyDown = false;
         bool m_HyperKeyDown = false;
 
-        public Shot[] Shots { get => m_Shots; set => m_Shots = value; }
+        public Shot[] Shots
+        {
+            get
+            {
+                return m_Shots;
+            }
+
+            set
+            {
+                m_Shots = value;
+            }
+        }
+
+        public UFO UFO
+        {
+            set
+            {
+                m_UFO = value;
+            }
+        }
 
         public Player(Game game) : base(game)
         {
             m_FlameTimer = new Timer(game);
             m_Flame = new PlayerFlame(game);
-            Shots = new Shot[4];
+            m_Ship = new PlayerShip(game);
+            m_Shots = new Shot[4];
+            m_ScoreHUD = new Number(game);
+            m_ScoreHUD.Moveable = false;
+            m_HiScoreHUD = new Number(game);
+            m_HiScoreHUD.Moveable = false;
+            m_ShipLives = new List<PlayerShip>();
+
+            for (int i = 0; i < 4; i++)
+            {
+                m_ShipLives.Add(new PlayerShip(game));
+                m_ShipLives[i].Position = new Vector3((-i * 15) + -400, 400, 0);
+                m_ShipLives[i].RotationInRadians = (float)Math.PI * 0.5f;
+                m_ShipLives[i].ScalePercent = 0.5f;
+            }
 
             for (int i = 0; i < 4; i++)
             {
@@ -33,17 +74,104 @@ namespace Asteroids
         public override void Initialize()
         {
             base.Initialize();
-            InitializeLineMesh();
-            m_FlameTimer.Amount = 0.06f;
+
+            m_FlameTimer.Amount = 0.01666f;
+        }
+
+        /// <summary>
+        /// Executed after initialization is complete
+        /// </summary>
+        public void BeginRun()
+        {
+            Radius = m_Ship.Radius;
+            NewGame();
         }
 
         public override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
+
+            m_Flame.Visible = Visible;
+            m_Ship.Visible = Visible;
             m_Flame.Position = Position;
             m_Flame.RotationInRadians = RotationInRadians;
+            m_Ship.Position = Position;
+            m_Ship.RotationInRadians = RotationInRadians;
+
+            if (Hit)
+            {
+                LostLife();
+            }
+
             CheckBorders();
             KeyInput();
+        }
+
+        public void CheckCollision()
+        {
+            if (m_UFO.Shot.Visible)
+            {
+                if (CirclesIntersect(m_UFO.Shot.Position, m_UFO.Shot.Radius))
+                {
+                    m_UFO.Shot.Visible = false;
+                    Hit = true;
+                }
+            }
+        }
+
+        public void SetScore(int add)
+        {
+            m_Score += add;
+
+            m_ScoreHUD.ProcessNumber(m_Score, new Vector3(-400, 440, 0), 10);
+
+            if (m_HiScore < m_Score)
+            {
+                m_HiScore = m_Score;
+                m_HiScoreHUD.ProcessNumber(m_HiScore, new Vector3(0, 440, 0), 8);
+            }
+        }
+
+        public void NewGame()
+        {
+            m_Lives = 4;
+            m_Score = 0;
+            Visible = true;
+            m_Ship.Visible = Visible;
+            ResetShip();
+            SetScore(0);
+        }
+
+        void LostLife()
+        {
+            m_Lives--;
+            Hit = false;
+
+            if (m_Lives < 1)
+            {
+                Visible = false;
+                GameOver = true;
+            }
+            ResetShip();
+
+        }
+
+        void ResetShip()
+        {
+            for (int i = 0; i < m_ShipLives.Count; i++)
+            {
+                m_ShipLives[i].Visible = false;
+            }
+
+            for (int i = 0; i < m_Lives; i++)
+            {
+                m_ShipLives[i].Visible = true;
+            }
+
+            Position = Vector3.Zero;
+            Velocity = Vector3.Zero;
+            Acceleration = Vector3.Zero;
+            RotationInRadians = Serv.RandomMinMax(0, (float)Math.PI * 2);
         }
 
         void ThrustOn()
@@ -75,7 +203,7 @@ namespace Asteroids
 
             if (testX + testY < maxPerSecond)
             {
-                Acceleration = SetVelocity(RotationInRadians, thrustAmount);
+                Acceleration = Serv.SetVelocity(RotationInRadians, thrustAmount);
             }
             else
             {
@@ -96,8 +224,8 @@ namespace Asteroids
                 if (!Shots[shotCount].Visible)
                 {
                     float speed = 500;
-                    Vector3 offset = SetVelocity(RotationInRadians, 11);
-                    Vector3 direction = SetVelocity(RotationInRadians, speed);
+                    Vector3 offset = Serv.SetVelocity(RotationInRadians, 11);
+                    Vector3 direction = Serv.SetVelocity(RotationInRadians, speed);
 
                     Shots[shotCount].Spawn(Position + offset, Velocity * 0.75f + direction, 1.55f);
                     break;
@@ -107,8 +235,8 @@ namespace Asteroids
 
         void Hyperspace()
         {
-            Position.X = Serv.RandomMinMax(-Serv.WindowWidth, Serv.WindowWidth);
-            Position.Y = Serv.RandomMinMax(-Serv.WindowHeight, Serv.WindowHeight);
+            Position.X = Serv.RandomMinMax(-Serv.WindowWidth * 0.5F, Serv.WindowWidth * 0.5F);
+            Position.Y = Serv.RandomMinMax(-Serv.WindowHeight * 0.5F, Serv.WindowHeight * 0.5F);
             Velocity = new Vector3(0);
             Acceleration = new Vector3(0);
         }
@@ -162,24 +290,6 @@ namespace Asteroids
             {
                 m_HyperKeyDown = false;
             }
-        }
-
-        void InitializeLineMesh()
-        {
-            Vector3[] pointPosition = new Vector3[6];
-
-            pointPosition[0] = new Vector3(-13.5f, 8f, 0);//Top back tip.
-            pointPosition[1] = new Vector3(13.5f, 0, 0);//Nose pointing to the left of screen.
-            pointPosition[2] = new Vector3(-13.5f, -9.4f, 0);//Bottom back tip.
-            pointPosition[3] = new Vector3(-10.6f, -4.7f, 0);//Bottom inside back.
-            pointPosition[4] = new Vector3(-10.6f, 4.7f, 0);//Top inside back.
-            pointPosition[5] = new Vector3(-13.5f, 9.4f, 0);//Top Back Tip.
-
-            InitializePoints(pointPosition);
-
-            Radius = 11.5f;
-
-            RotationInRadians = Serv.RandomMinMax(0, (float)Math.PI);
         }
     }
 }

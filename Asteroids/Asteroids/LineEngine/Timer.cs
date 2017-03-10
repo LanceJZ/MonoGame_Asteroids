@@ -17,7 +17,18 @@ namespace Asteroids.LineEngine
             get { return m_Seconds; }
         }
 
-        public float Amount { get => m_Amount; set => m_Amount = value; }
+        public float Amount
+        {
+            get
+            {
+                return m_Amount;
+            }
+
+            set
+            {
+                m_Amount = value;
+            }
+        }
 
         public Timer(Game game) : base(game)
         {
