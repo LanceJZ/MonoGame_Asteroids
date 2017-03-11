@@ -104,7 +104,7 @@ namespace Asteroids
             {
                 foreach (LineEngine.LineMesh word in m_Letters)
                 {
-                    word.Visible = false;
+                    word.Active = false;
                 }
             }
         }
@@ -115,7 +115,7 @@ namespace Asteroids
             {
                 foreach (LineEngine.LineMesh word in m_Letters)
                 {
-                    word.Visible = true;
+                    word.Active = true;
                 }
             }
         }

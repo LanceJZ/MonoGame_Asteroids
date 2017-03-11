@@ -9,7 +9,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace Asteroids.LineEngine
 {
-    public class LineMesh : PositionedObject
+    public class LineMesh : PositionedObject, IDrawComponent
     {
         Matrix m_LocalMatrix;
         VertexPositionColor[] m_PointList;
@@ -19,7 +19,7 @@ namespace Asteroids.LineEngine
         bool m_Initialized = false;
 
         public LineMesh (Game game) : base(game)
-        {            
+        {
         }
 
         public override void Initialize()
@@ -28,8 +28,11 @@ namespace Asteroids.LineEngine
             m_RasterizerState = new RasterizerState();
             m_RasterizerState.FillMode = FillMode.WireFrame;
             m_RasterizerState.CullMode = CullMode.None;
-            Visible = true;
+            Active = true;
             Enabled = true;
+
+            Services.AddDrawableComponent(this);
+
         }
 
         public override void Update(GameTime gameTime)
@@ -37,25 +40,26 @@ namespace Asteroids.LineEngine
             base.Update(gameTime);
         }
 
-        public override void Draw(GameTime gameTime)
+        public void Draw(GameTime gameTime)
         {
-            base.Draw(gameTime);
-
-            Transform();
-
-            foreach (EffectPass pass in Services.BasicEffect.CurrentTechnique.Passes)
+            if (Active)
             {
-                pass.Apply();
-            }
+                Transform();
 
-            Services.GraphicsDM.GraphicsDevice.DrawUserIndexedPrimitives<VertexPositionColor>(
-                PrimitiveType.LineList, m_PointList,
-                0,  // vertex buffer offset to add to each element of the index buffer
-                m_PointList.Length,  // number of vertices in pointList
-                m_LineListIndices,  // the index buffer
-                0,  // first index element to read
-                m_PointList.Length - 1   // number of primitives to draw
-            );
+                foreach (EffectPass pass in Services.BasicEffect.CurrentTechnique.Passes)
+                {
+                    pass.Apply();
+                }
+
+                Services.GraphicsDM.GraphicsDevice.DrawUserIndexedPrimitives<VertexPositionColor>(
+                    PrimitiveType.LineList, m_PointList,
+                    0,  // vertex buffer offset to add to each element of the index buffer
+                    m_PointList.Length,  // number of vertices in pointList
+                    m_LineListIndices,  // the index buffer
+                    0,  // first index element to read
+                    m_PointList.Length - 1   // number of primitives to draw
+                );
+            }
         }
 
         public void Destroy()

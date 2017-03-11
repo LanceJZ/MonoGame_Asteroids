@@ -66,7 +66,7 @@ namespace Asteroids
 
         public override void Update(GameTime gameTime)
         {
-            if (Visible)
+            if (Active)
             {
                 base.Update(gameTime);
                 CheckBorders();
@@ -97,7 +97,7 @@ namespace Asteroids
 
         void CheckCollusions()
         {
-            if (Player.Visible)
+            if (Player.Active)
             {
                 if (CirclesIntersect(Player.Position, Player.Radius))
                 {
@@ -109,18 +109,18 @@ namespace Asteroids
 
             for (int i = 0; i < 4; i++)
             {
-                if (Player.Shots[i].Visible)
+                if (Player.Shots[i].Active)
                 {
                     if (CirclesIntersect(Player.Shots[i].Position, Player.Shots[i].Radius))
                     {
                         Explode();
-                        Player.Shots[i].Visible = false;
+                        Player.Shots[i].Active = false;
                         Player.SetScore(m_Points);
                     }
                 }
             }
 
-            if (UFO.Visible)
+            if (UFO.Active)
             {
                 if (CirclesIntersect(UFO.Position, UFO.Radius))
                 {
@@ -128,12 +128,12 @@ namespace Asteroids
                     UFO.Explode();
                 }
 
-                if (UFO.Shot.Visible)
+                if (UFO.Shot.Active)
                 {
                     if (CirclesIntersect(UFO.Shot.Position, UFO.Shot.Radius))
                     {
                         Explode();
-                        UFO.Shot.Visible = false;
+                        UFO.Shot.Active = false;
                     }
                 }
             }
@@ -158,7 +158,7 @@ namespace Asteroids
 
         public void Spawn()
         {
-            Visible = true;
+            Active = true;
             Velocity = Serv.SetRandomVelocity(m_Speed);
             GameOver = Player.GameOver;
         }

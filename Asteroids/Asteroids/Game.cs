@@ -16,6 +16,7 @@ namespace Asteroids
     {
         GraphicsDeviceManager m_GraphicsDM;
         Player m_Player;
+        LineEngine.PositionedObject m_PlayerClear;
         UFO m_UFO;
         Timer m_UFOTimer;
         List<Rock> m_LargeRocks;
@@ -38,6 +39,7 @@ namespace Asteroids
             IsFixedTimeStep = false;
             Content.RootDirectory = "Media";
             m_Player = new Player(this);
+            m_PlayerClear = new LineEngine.PositionedObject(this);
             m_UFO = new UFO(this);
             m_UFOTimer = new Timer(this);
             m_LargeRocks = new List<Rock>();
@@ -52,13 +54,16 @@ namespace Asteroids
         /// </summary>
         protected override void Initialize()
         {
-            Serv.Initialize(m_GraphicsDM);
+            Serv.Initialize(m_GraphicsDM, this);
 
             base.Initialize();
 
             m_UFOTimer.Reset();
             m_UFOTimer.Amount = m_UFOTimerSeedAmount;
             m_UFO.Initialize(m_Player);
+
+            m_PlayerClear.Radius = 150;
+            m_PlayerClear.Moveable = false;
         }
 
         /// <summary>
@@ -109,6 +114,13 @@ namespace Asteroids
                     NewGame();
                 }
             }
+            else if (m_Player.CheckClear)
+            {
+                if (CheckPlayerClear())
+                {
+                    m_Player.Spawn = true;
+                }
+            }
 
             CountRocks();
 
@@ -123,9 +135,60 @@ namespace Asteroids
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(new Color(new Vector3(0.015f, 0, 0.08f)));
+            GraphicsDevice.Clear(new Color(new Vector3(0.01666f, 0, 0.1f)));
 
             base.Draw(gameTime);
+        }
+
+        bool CheckPlayerClear()
+        {
+            foreach (Rock rock in m_LargeRocks)
+            {
+                if (rock.Active)
+                {
+                    if (m_PlayerClear.CirclesIntersect(rock.Position, rock.Radius))
+                    {
+                        return false;
+                    }
+                }
+            }
+
+            foreach (Rock rock in m_MedRocks)
+            {
+                if (rock.Active)
+                {
+                    if (m_PlayerClear.CirclesIntersect(rock.Position, rock.Radius))
+                    {
+                        return false;
+                    }
+                }
+            }
+
+            foreach (Rock rock in m_SmallRocks)
+            {
+                if (rock.Active)
+                {
+                    if (m_PlayerClear.CirclesIntersect(rock.Position, rock.Radius))
+                    {
+                        return false;
+                    }
+                }
+            }
+
+            if (m_UFO.Active)
+            {
+                if (m_PlayerClear.CirclesIntersect(m_UFO.Position, m_UFO.Radius))
+                {
+                    return false;
+                }
+            }
+
+            if (m_UFO.Shot.Active)
+            {
+                return false;
+            }
+
+            return true;
         }
 
         void NewGame()
@@ -135,17 +198,17 @@ namespace Asteroids
 
             for (int i = 0; i < m_LargeRocks.Count; i++)
             {
-                m_LargeRocks[i].Visible = false;
+                m_LargeRocks[i].Active = false;
             }
 
             for (int i = 0; i < m_MedRocks.Count; i++)
             {
-                m_MedRocks[i].Visible = false;
+                m_MedRocks[i].Active = false;
             }
 
             for (int i = 0; i < m_SmallRocks.Count; i++)
             {
-                m_SmallRocks[i].Visible = false;
+                m_SmallRocks[i].Active = false;
             }
 
             m_Wave = 0;            
@@ -154,7 +217,7 @@ namespace Asteroids
 
         void UFOController()
         {
-            if (m_UFOTimer.Seconds > m_UFOTimer.Amount && !m_UFO.Visible)
+            if (m_UFOTimer.Seconds > m_UFOTimer.Amount && !m_UFO.Active)
             {
                 m_UFOTimer.Amount = Serv.RandomMinMax(m_UFOTimerSeedAmount * 0.5f,
                     m_UFOTimerSeedAmount + (m_UFOTimerSeedAmount - m_Wave));
@@ -171,7 +234,7 @@ namespace Asteroids
         void ResetUFO()
         {
             m_UFOTimer.Reset();
-            m_UFO.Visible = false;
+            m_UFO.Active = false;
             m_UFO.Done = false;
             m_UFO.Hit = false;
         }
@@ -182,14 +245,14 @@ namespace Asteroids
 
             foreach (Rock rock in m_LargeRocks)
             {
-                if (rock.Visible)
+                if (rock.Active)
                 {
                     rockCount++;
 
                     if (rock.Hit)
                     {
                         SpawnMedRocks(rock.Position);
-                        rock.Visible = false;
+                        rock.Active = false;
                         rock.Hit = false;
                     }
                 }
@@ -198,14 +261,14 @@ namespace Asteroids
 
             foreach (Rock rock in m_MedRocks)
             {
-                if (rock.Visible)
+                if (rock.Active)
                 {
                     rockCount++;
 
                     if (rock.Hit)
                     {
                         SpawnSmallRocks(rock.Position);
-                        rock.Visible = false;
+                        rock.Active = false;
                         rock.Hit = false;
                     }
                 }
@@ -214,13 +277,13 @@ namespace Asteroids
 
             foreach (Rock rock in m_SmallRocks)
             {
-                if (rock.Visible)
+                if (rock.Active)
                 {
                     rockCount++;
 
                     if (rock.Hit)
                     {
-                        rock.Visible = false;
+                        rock.Active = false;
                         rock.Hit = false;
                     }
                 }
@@ -248,7 +311,7 @@ namespace Asteroids
 
                 foreach (Rock rock in m_LargeRocks)
                 {
-                    if (!rock.Visible && !rock.ExplosionActive)
+                    if (!rock.Active && !rock.ExplosionActive)
                     {
                         spawnNewRock = false;
                         rock.Spawn();
@@ -277,7 +340,7 @@ namespace Asteroids
 
                 foreach (Rock rock in m_MedRocks)
                 {
-                    if (!rock.Visible && !rock.ExplosionActive)
+                    if (!rock.Active && !rock.ExplosionActive)
                     {
                         spawnNewRock = false;
                         rock.Spawn(position);
@@ -302,7 +365,7 @@ namespace Asteroids
 
                 foreach (Rock rock in m_SmallRocks)
                 {
-                    if (!rock.Visible && !rock.ExplosionActive)
+                    if (!rock.Active && !rock.ExplosionActive)
                     {
                         spawnNewRock = false;
                         rock.Spawn(position);

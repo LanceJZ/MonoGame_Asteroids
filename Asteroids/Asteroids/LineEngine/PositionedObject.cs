@@ -5,7 +5,7 @@ using Microsoft.Xna.Framework;
 
 namespace Asteroids.LineEngine
 {
-    public class PositionedObject : DrawableGameComponent
+    public class PositionedObject : GameComponent
     {
         #region Fields
         private float m_FrameTime;
@@ -27,6 +27,7 @@ namespace Asteroids.LineEngine
         bool m_Pause = false;
         bool m_GameOver = false;
         bool m_Moveable = true;
+        bool m_Active = true;
         #endregion
         #region Properties
         public float FrameTime { get { return m_FrameTime; } }
@@ -161,6 +162,19 @@ namespace Asteroids.LineEngine
             }
         }
 
+        public bool Active
+        {
+            get
+            {
+                return m_Active;
+            }
+
+            set
+            {
+                m_Active = value;
+            }
+        }
+
         #endregion
         #region Constructor
         /// <summary>
@@ -180,7 +194,7 @@ namespace Asteroids.LineEngine
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         public override void Update(GameTime gameTime)
         {
-            if (Visible && Moveable)
+            if (Active && Moveable)
             {
                 base.Update(gameTime);
                 m_FrameTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
@@ -188,6 +202,12 @@ namespace Asteroids.LineEngine
                 Position += Velocity * m_FrameTime;
                 RotationVelocity += RotationAcceleration * m_FrameTime;
                 RotationInRadians += RotationVelocity * m_FrameTime;
+
+                if (RotationInRadians > MathHelper.TwoPi)
+                    RotationInRadians = 0;
+
+                if (RotationInRadians < 0)
+                    RotationInRadians = MathHelper.TwoPi;
             }
         }
 

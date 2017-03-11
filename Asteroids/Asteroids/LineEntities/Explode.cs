@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 
 namespace Asteroids
@@ -39,7 +35,7 @@ namespace Asteroids
 
             foreach (Dot dot in m_Dots)
             {
-                if (dot.Visible)
+                if (dot.Active)
                 {
                     done = false;
                     break;

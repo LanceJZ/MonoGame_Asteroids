@@ -8,7 +8,7 @@ using Microsoft.Xna.Framework.Content;
 
 namespace Asteroids.LineEngine
 {
-    public sealed class Services
+    public sealed class Services : DrawableGameComponent
     {
         #region Fields
         private static Services m_Instance = null;
@@ -19,6 +19,8 @@ namespace Asteroids.LineEngine
         private static Matrix m_ProjectionMatrix;
         private static Matrix m_WorldMatrix;
         private static Vector2 m_ScreenSize;
+        private static List<IDrawComponent> m_DrawableComponents;
+        private static Game m_Game;
         #endregion
         #region Properties
         /// <summary>
@@ -58,6 +60,12 @@ namespace Asteroids.LineEngine
         public static Matrix ProjectionMatrix
         {
             get { return m_ProjectionMatrix; }
+        }
+
+        public static void AddDrawableComponent(IDrawComponent drawableComponent)
+        {
+            m_DrawableComponents.Add(drawableComponent);
+            
         }
 
         /// <summary>
@@ -117,14 +125,22 @@ namespace Asteroids.LineEngine
         /// This is the constructor for the Services
         /// You will note that it is private that means that only the Services can only create itself.
         /// </summary>
-        private Services()
-        {            
+        private Services(Game game) : base(game)
+        {
+            game.Components.Add(this);
         }
         #endregion
 
         #region Public Methods
-        public static void Update(GameTime gametime)
+
+        public override void Draw(GameTime gameTime)
         {
+            base.Draw(gameTime);
+
+            foreach(IDrawComponent drawable in m_DrawableComponents)
+            {
+                drawable.Draw(gameTime);
+            }
         }
         /// <summary>
         /// This is used to start up Panther Engine Services.
@@ -134,7 +150,7 @@ namespace Asteroids.LineEngine
         /// You pass in the game class so you can get information needed.
         /// </summary>
         /// <param name="graphics">Reference to the graphic device.</param>
-        public static void Initialize(GraphicsDeviceManager graphics)
+        public static void Initialize(GraphicsDeviceManager graphics, Game game)
         {
             //First make sure there is not already an instance started
             if (m_Instance == null)
@@ -142,7 +158,7 @@ namespace Asteroids.LineEngine
                 m_GraphicsDM = graphics;
                 m_ScreenSize = new Vector2(graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight);
                 //Create the Engine Services
-                m_Instance = new Services();
+                m_Instance = new Services(game);
                 m_RandomNumber = new Random();
                 //Set View Matrix and Projection Matrix
                 m_ViewMatrix = Matrix.CreateLookAt(new Vector3(0.0f, 0.0f, 1f), Vector3.Zero, Vector3.Up);
@@ -153,6 +169,7 @@ namespace Asteroids.LineEngine
                 BasicEffect.Projection = m_ProjectionMatrix;
                 BasicEffect.World = WorldMatrix;
                 m_WorldMatrix = Matrix.CreateTranslation(0, 0, 0);
+                m_DrawableComponents = new List<IDrawComponent>();
 
                 return;
             }

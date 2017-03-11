@@ -24,7 +24,7 @@ namespace Asteroids
 
             if (m_LifeTimer.Seconds > m_LifeTimer.Amount)
             {
-                Visible = false;
+                Active = false;
             }
         }
 
@@ -34,12 +34,12 @@ namespace Asteroids
             m_LifeTimer.Amount = timer;
             Position = position;
             Velocity = velecity;
-            Visible = true;
+            Active = true;
         }
 
         public void Reset()
         {
-            Visible = false;
+            Active = false;
         }
 
         void InitializeLineMesh()
@@ -53,7 +53,7 @@ namespace Asteroids
 
             InitializePoints(pointPosition);
 
-            Visible = false;
+            Active = false;
             Radius = 0.5f;
         }
     }

@@ -18,7 +18,7 @@ namespace Asteroids
             base.Update(gameTime);
 
             if (m_LifeTimer.Seconds > m_LifeTimer.Amount)
-                Visible = false;
+                Active = false;
         }
 
         public override void Initialize()
@@ -34,7 +34,7 @@ namespace Asteroids
             Velocity = new Vector3(serv.RandomMinMax(-16, 16), serv.RandomMinMax(-16, 16), 0);
             m_LifeTimer.Reset();
             m_LifeTimer.Amount = serv.RandomMinMax(0.1f, 1);
-            Visible = true;
+            Active = true;
         }
 
         void InitializeLineMesh()

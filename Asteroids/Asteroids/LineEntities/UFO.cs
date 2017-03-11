@@ -63,7 +63,7 @@ namespace Asteroids
         public void Initialize(Player player)
         {
             m_Player = player;
-            Visible = false;
+            Active = false;
             m_ShotTimer.Amount = 2.75f;
             m_VectorTimer.Amount = 3.15f;
         }
@@ -101,7 +101,7 @@ namespace Asteroids
         {
             base.Update(gameTime);
 
-            if (Visible)
+            if (Active)
             {
 
                 if (Position.X > Serv.WindowWidth * 0.5f || Position.X < -Serv.WindowWidth * 0.5f)
@@ -118,7 +118,7 @@ namespace Asteroids
 
         public void Spawn(int SpawnCount, int Wave)
         {
-            Visible = true;
+            Active = true;
             Done = false;
             Hit = false;
             m_ShotTimer.Reset();
@@ -161,7 +161,7 @@ namespace Asteroids
 
         void CheckColusion()
         {
-            if (m_Player.Visible)
+            if (m_Player.Active)
             {
                 if (CirclesIntersect(m_Player.Position, m_Player.Radius))
                 {
@@ -172,11 +172,11 @@ namespace Asteroids
 
             for (int i = 0; i < 4; i++)
             {
-                if (m_Player.Shots[i].Visible)
+                if (m_Player.Shots[i].Active)
                 {
                     if (CirclesIntersect(m_Player.Shots[i].Position, m_Player.Shots[i].Radius))
                     {
-                        m_Player.Shots[i].Visible = false;
+                        m_Player.Shots[i].Active = false;
                         m_Player.SetScore(m_Points);
                         Explode();
                     }

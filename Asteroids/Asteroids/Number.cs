@@ -72,7 +72,7 @@ namespace Asteroids
             {
                 for (int i = 0; i < m_EachLine.Count; i++)
                 {
-                    m_EachLine[i].Visible = false;
+                    m_EachLine[i].Active = false;
                     m_EachLine[i].Enabled = false;
                     m_EachLine[i].Remove();
                     m_EachLine[i].Destroy();
@@ -88,7 +88,7 @@ namespace Asteroids
             {
                 foreach (LineEngine.LineMesh num in m_EachLine)
                 {
-                    num.Visible = false;
+                    num.Active = false;
                 }
             }
         }
@@ -99,7 +99,7 @@ namespace Asteroids
             {
                 foreach (LineEngine.LineMesh num in m_EachLine)
                 {
-                    num.Visible = true;
+                    num.Active = true;
                 }
             }
         }
