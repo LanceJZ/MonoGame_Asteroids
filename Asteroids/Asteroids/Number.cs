@@ -126,6 +126,7 @@ namespace Asteroids
                         m_EachLine.Add(new LineEngine.LineMesh(m_Game));
                         m_EachLine[m_EachLine.Count - 1].Position = Position - new Vector3(location, 0, 0);
                         m_EachLine[m_EachLine.Count - 1].InitializePoints(numberLines);
+                        m_EachLine[m_EachLine.Count - 1].Moveable = false;
                     }
                 }
             }

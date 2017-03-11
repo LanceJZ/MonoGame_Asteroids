@@ -10,6 +10,7 @@ namespace Asteroids
 
     public class Player : LineEngine.PositionedObject
     {
+        Game m_Game;
         Timer m_FlameTimer;
         PlayerFlame m_Flame;
         PlayerShip m_Ship;
@@ -69,6 +70,7 @@ namespace Asteroids
 
         public Player(Game game) : base(game)
         {
+            m_Game = game;
             m_FlameTimer = new Timer(game);
             m_Flame = new PlayerFlame(game);
             m_Ship = new PlayerShip(game);
@@ -82,10 +84,7 @@ namespace Asteroids
 
             for (int i = 0; i < 4; i++)
             {
-                m_ShipLives.Add(new PlayerShip(game));
-                m_ShipLives[i].Position = new Vector3((-i * 15) + -400, 400, 0);
-                m_ShipLives[i].RotationInRadians = (float)Math.PI * 0.5f;
-                m_ShipLives[i].ScalePercent = 0.5f;
+                MakeShipLives(i);
             }
 
             for (int i = 0; i < 4; i++)
@@ -193,6 +192,14 @@ namespace Asteroids
             SetScore(0);
         }
 
+        void MakeShipLives(int count)
+        {
+            m_ShipLives.Add(new PlayerShip(m_Game));
+            m_ShipLives[count].Position = new Vector3((-count * 15) + -400, 400, 0);
+            m_ShipLives[count].RotationInRadians = (float)Math.PI * 0.5f;
+            m_ShipLives[count].ScalePercent = 0.5f;
+        }
+
         void Explode()
         {
             m_Explosion.Spawn(Position, Radius);
@@ -220,6 +227,11 @@ namespace Asteroids
             for (int i = 0; i < m_ShipLives.Count; i++)
             {
                 m_ShipLives[i].Active = false;
+            }
+
+            if (m_Lives > m_ShipLives.Count)
+            {
+                MakeShipLives(m_Lives - 1);
             }
 
             for (int i = 0; i < m_Lives; i++)
