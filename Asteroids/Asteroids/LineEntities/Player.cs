@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework.Audio;
 
 namespace Asteroids
 {
@@ -12,11 +13,16 @@ namespace Asteroids
     {
         Game m_Game;
         Timer m_FlameTimer;
+        Timer m_ThrustTimer;
         PlayerFlame m_Flame;
         PlayerShip m_Ship;
         List<PlayerShip> m_ShipLives;
         Shot[] m_Shots;
         UFO m_UFO;
+        SoundEffect m_FireShot;
+        SoundEffect m_Explode;
+        SoundEffect m_Bonus;
+        SoundEffect m_Thrust;
         LineExplode m_Explosion;
         Number m_ScoreHUD;
         Number m_HiScoreHUD;
@@ -30,6 +36,7 @@ namespace Asteroids
         bool m_Exploding = false;
         bool m_Spawn = true;
         bool m_CheckClear = false;
+        bool m_GameOver = false;
 
         public Shot[] Shots
         {
@@ -68,10 +75,24 @@ namespace Asteroids
             }
         }
 
+        public bool GameOver
+        {
+            get
+            {
+                return m_GameOver;
+            }
+
+            set
+            {
+                m_GameOver = value;
+            }
+        }
+
         public Player(Game game) : base(game)
         {
             m_Game = game;
             m_FlameTimer = new Timer(game);
+            m_ThrustTimer = new Timer(game);
             m_Flame = new PlayerFlame(game);
             m_Ship = new PlayerShip(game);
             m_Shots = new Shot[4];
@@ -105,20 +126,15 @@ namespace Asteroids
         /// </summary>
         public void BeginRun()
         {
+            m_Ship.Active = false;
+            m_Flame.Active = false;
             Radius = m_Ship.Radius;
-            NewGame();
+            ShipLivesDisplay();
         }
 
         public override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
-
-            m_Flame.Active = Active;
-            m_Ship.Active = Active;
-            m_Flame.Position = Position;
-            m_Flame.RotationInRadians = RotationInRadians;
-            m_Ship.Position = Position;
-            m_Ship.RotationInRadians = RotationInRadians;
 
             if (Hit)
             {
@@ -141,12 +157,21 @@ namespace Asteroids
                 if (!GameOver)
                 {
                     Active = true;
+                    m_Ship.Active = true;
                     m_Spawn = false;
                 }
             }
 
-            CheckBorders();
-            KeyInput();
+            if (Active)
+            {
+                CheckBorders();
+                KeyInput();
+                m_Flame.Position = Position;
+                m_Flame.RotationInRadians = RotationInRadians;
+                m_Ship.Position = Position;
+                m_Ship.RotationInRadians = RotationInRadians;
+            }
+
         }
 
         public void CheckCollision()
@@ -175,6 +200,7 @@ namespace Asteroids
 
             if (m_Score > m_NextBonusLife)
             {
+                m_Bonus.Play(0.15f, 0, 0);
                 m_Lives++;
                 m_NextBonusLife += 10000;
                 ShipLivesDisplay();
@@ -187,9 +213,19 @@ namespace Asteroids
             m_Score = 0;
             m_NextBonusLife = m_BaseBonusLife;
             Active = true;
-            m_Ship.Active = Active;
+            m_Ship.Active = true;
             ResetShip();
             SetScore(0);
+        }
+
+        public void LoadSounds(SoundEffect fireshot, SoundEffect explode, SoundEffect bonus, SoundEffect thurst)
+        {
+            m_FireShot = fireshot;
+            m_Explode = explode;
+            m_Bonus = bonus;
+            m_Thrust = thurst;
+
+            m_ThrustTimer.Amount = (float)m_Thrust.Duration.TotalSeconds;
         }
 
         void MakeShipLives(int count)
@@ -202,6 +238,7 @@ namespace Asteroids
 
         void Explode()
         {
+            m_Explode.Play(0.5f, 0, 0);
             m_Explosion.Spawn(Position, Radius);
             m_Exploding = true;
         }
@@ -210,6 +247,8 @@ namespace Asteroids
         {
             m_Lives--;
             Active = false;
+            m_Ship.Active = false;
+            m_Flame.Active = false;
             m_Spawn = false;
 
             if (m_Lives < 1)
@@ -265,6 +304,13 @@ namespace Asteroids
                     m_Flame.Active = true;
             }
 
+            if (m_ThrustTimer.Seconds > m_ThrustTimer.Amount)
+            {
+                m_ThrustTimer.Reset();
+
+                m_Thrust.Play(0.9f, 0, 0);
+            }
+
             if (Velocity.Y < 0)
                 testY = -Velocity.Y;
             else
@@ -297,6 +343,8 @@ namespace Asteroids
             {
                 if (!Shots[shotCount].Active)
                 {
+                    m_FireShot.Play(0.15f, 0, 0);
+
                     float speed = 500;
                     Vector3 offset = Serv.SetVelocity(RotationInRadians, 11);
                     Vector3 direction = Serv.SetVelocity(RotationInRadians, speed);

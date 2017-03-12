@@ -37,11 +37,6 @@ namespace Asteroids
             m_EachLine = new List<LineEngine.LineMesh>();
         }
 
-        public override void Update(GameTime gametime)
-        {
-            // Do stuff every new frame
-        }
-
         public void ProcessNumber(int number, Vector3 locationStart, float size)
         {
             DeleteNumbers();
@@ -63,6 +58,34 @@ namespace Asteroids
             } while (numberIn > 0);
         }
 
+        void MakeNumberMesh(float location, int number, float size)
+        {
+            Vector3[] numberLine = new Vector3[2];
+
+            if (number > -1 && number < 10)
+            {
+                for (int line = 0; line < 7; line++)
+                {
+                    if (Numbers[number].Lines[line])
+                    {
+                        float Xstart = m_NumberLineStart[line].X * (size * 1.25f);
+                        float Ystart = m_NumberLineStart[line].Y * size;
+
+                        float Xend = m_NumberLineEnd[line].X * (size * 1.25f);
+                        float Yend = m_NumberLineEnd[line].Y * size;
+
+                        numberLine[0] = new Vector3(Xstart, Ystart, 0);
+                        numberLine[1] = new Vector3(Xend, Yend, 0);
+
+                        m_EachLine.Add(new LineEngine.LineMesh(m_Game));
+                        m_EachLine[m_EachLine.Count - 1].Position = Position - new Vector3(location, 0, 0);
+                        m_EachLine[m_EachLine.Count - 1].InitializePoints(numberLine);
+                        m_EachLine[m_EachLine.Count - 1].Moveable = false;
+                    }
+                }
+            }
+        }
+
         public void DeleteNumbers()
         {
             if (m_Numbers.Count > 0)
@@ -70,12 +93,12 @@ namespace Asteroids
 
             if (m_EachLine.Count > 0)
             {
-                for (int i = 0; i < m_EachLine.Count; i++)
+                foreach (LineEngine.LineMesh line in m_EachLine)
                 {
-                    m_EachLine[i].Active = false;
-                    m_EachLine[i].Enabled = false;
-                    m_EachLine[i].Remove();
-                    m_EachLine[i].Destroy();
+                    line.Active = false;
+                    line.Enabled = false;
+                    line.Remove();
+                    line.Destroy();
                 }
 
                 m_EachLine.Clear();
@@ -100,34 +123,6 @@ namespace Asteroids
                 foreach (LineEngine.LineMesh num in m_EachLine)
                 {
                     num.Active = true;
-                }
-            }
-        }
-
-        void MakeNumberMesh(float location, int number, float size)
-        {
-            Vector3[] numberLines = new Vector3[2];
-
-            if (number > -1 && number < 10)
-            {
-                for (int line = 0; line < 7; line++)
-                {
-                    if (Numbers[number].Lines[line])
-                    {
-                        float Xstart = m_NumberLineStart[line].X * (size * 1.25f);
-                        float Ystart = m_NumberLineStart[line].Y * size;
-
-                        float Xend = m_NumberLineEnd[line].X * (size * 1.25f);
-                        float Yend = m_NumberLineEnd[line].Y * size;
-
-                        numberLines[0] = new Vector3(Xstart, Ystart, 0);
-                        numberLines[1] = new Vector3(Xend, Yend, 0);
-
-                        m_EachLine.Add(new LineEngine.LineMesh(m_Game));
-                        m_EachLine[m_EachLine.Count - 1].Position = Position - new Vector3(location, 0, 0);
-                        m_EachLine[m_EachLine.Count - 1].InitializePoints(numberLines);
-                        m_EachLine[m_EachLine.Count - 1].Moveable = false;
-                    }
                 }
             }
         }

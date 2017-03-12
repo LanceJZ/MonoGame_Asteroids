@@ -1,6 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 
 namespace Asteroids
 {
@@ -18,6 +18,12 @@ namespace Asteroids
         Explode m_Explosion;
         Timer m_ShotTimer;
         Timer m_VectorTimer;
+        Timer m_LargeTimer;
+        Timer m_SmallTimer;
+        SoundEffect m_Explode;
+        SoundEffect m_Large;
+        SoundEffect m_Small;
+        SoundEffect m_FireShot;
         float m_Speed = 66;
         int m_Points;
         int m_PlayerScore;
@@ -56,6 +62,8 @@ namespace Asteroids
         {
             m_ShotTimer = new Timer(game);
             m_VectorTimer = new Timer(game);
+            m_LargeTimer = new Timer(game);
+            m_SmallTimer = new Timer(game);
             m_Shot = new Shot(game);
             m_Explosion = new Explode(game);
         }
@@ -76,25 +84,15 @@ namespace Asteroids
             Position.X = Serv.WindowWidth;
         }
 
-        void InitializeLineMesh()
+        public void LoadSounds(SoundEffect explode, SoundEffect shot, SoundEffect large, SoundEffect small)
         {
-            Vector3[] pointPosition = new Vector3[12];
+            m_Explode = explode;
+            m_FireShot = shot;
+            m_Large = large;
+            m_Small = small;
 
-            pointPosition[0] = new Vector3(8.2f, 4.7f, 0);// Upper left
-            pointPosition[1] = new Vector3(22.3f, -4.7f, 0);// Lower inside Left
-            pointPosition[2] = new Vector3(9.4f, -12.9f, 0);// Bottom left
-            pointPosition[3] = new Vector3(-9.4f, -12.9f, 0);// Bottom right
-            pointPosition[4] = new Vector3(-22.3f, -4.7f, 0);// Upper right
-            pointPosition[5] = new Vector3(-8.2f, 4.7f, 0);// Lower inside right
-            pointPosition[6] = new Vector3(-3.5f, 12.9f, 0);// Right Top
-            pointPosition[7] = new Vector3(3.5f, 12.9f, 0);// Left Top
-            pointPosition[8] = new Vector3(8.2f, 4.7f, 0); // Upper inside right
-            pointPosition[9] = new Vector3(-8.2f, 4.7f, 0);// Upper inside left
-            pointPosition[10] = new Vector3(-22.3f, -4.7f, 0);// Lower inside left
-            pointPosition[11] = new Vector3(22.3f, -4.7f, 0);// Lower inside Right
-
-            InitializePoints(pointPosition);
-            Radius = 22.3f;
+            m_LargeTimer.Amount = (float)m_Large.Duration.TotalSeconds;
+            m_SmallTimer.Amount = (float)m_Small.Duration.TotalSeconds;
         }
 
         public override void Update(GameTime gameTime)
@@ -103,6 +101,25 @@ namespace Asteroids
 
             if (Active)
             {
+                if (!m_Player.GameOver)
+                {
+                    if (m_SmallSoucer)
+                    {
+                        if (m_SmallTimer.Seconds > m_SmallTimer.Amount)
+                        {
+                            m_SmallTimer.Reset();
+                            m_Small.Play(0.15f, 0, 0);
+                        }
+                    }
+                    else
+                    {
+                        if (m_LargeTimer.Seconds > m_LargeTimer.Amount)
+                        {
+                            m_LargeTimer.Reset();
+                            m_Large.Play(0.15f, 0, 0);
+                        }
+                    }
+                }
 
                 if (Position.X > Serv.WindowWidth * 0.5f || Position.X < -Serv.WindowWidth * 0.5f)
                 {
@@ -155,6 +172,9 @@ namespace Asteroids
 
         public void Explode()
         {
+            if (!m_Player.GameOver)
+                m_Explode.Play();
+
             m_Explosion.Spawn(Position, Radius);
             Hit = true;
         }
@@ -202,8 +222,8 @@ namespace Asteroids
 
         void FireShot()
         {
-            //if (!m_GameOver)
-            //    m_FireSoundInstance.Play();
+            if (!m_Player.GameOver)
+                m_FireShot.Play(0.25f, 0, 0);
 
             m_ShotTimer.Reset();
             float speed = 400;
@@ -236,6 +256,27 @@ namespace Asteroids
                 else
                     Velocity.Y = 0;
             }
+        }
+
+        void InitializeLineMesh()
+        {
+            Vector3[] pointPosition = new Vector3[12];
+
+            pointPosition[0] = new Vector3(8.2f, 4.7f, 0);// Upper left
+            pointPosition[1] = new Vector3(22.3f, -4.7f, 0);// Lower inside Left
+            pointPosition[2] = new Vector3(9.4f, -12.9f, 0);// Bottom left
+            pointPosition[3] = new Vector3(-9.4f, -12.9f, 0);// Bottom right
+            pointPosition[4] = new Vector3(-22.3f, -4.7f, 0);// Upper right
+            pointPosition[5] = new Vector3(-8.2f, 4.7f, 0);// Lower inside right
+            pointPosition[6] = new Vector3(-3.5f, 12.9f, 0);// Right Top
+            pointPosition[7] = new Vector3(3.5f, 12.9f, 0);// Left Top
+            pointPosition[8] = new Vector3(8.2f, 4.7f, 0); // Upper inside right
+            pointPosition[9] = new Vector3(-8.2f, 4.7f, 0);// Upper inside left
+            pointPosition[10] = new Vector3(-22.3f, -4.7f, 0);// Lower inside left
+            pointPosition[11] = new Vector3(22.3f, -4.7f, 0);// Lower inside Right
+
+            InitializePoints(pointPosition);
+            Radius = 22.3f;
         }
     }
 }

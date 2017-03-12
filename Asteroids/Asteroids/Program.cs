@@ -13,9 +13,8 @@ namespace Asteroids
         [STAThread]
         static void Main()
         {
-            Game game;
-            game = new Game();
-            game.Run();
+            using (var game = new Game())
+                game.Run();
         }
     }
 }

@@ -138,7 +138,7 @@ namespace Asteroids.LineEngine
             base.Draw(gameTime);
 
             foreach(IDrawComponent drawable in m_DrawableComponents)
-            {
+            {                
                 drawable.Draw(gameTime);
             }
         }

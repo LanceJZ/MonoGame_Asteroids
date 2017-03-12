@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework.Audio;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -8,6 +9,7 @@ namespace Asteroids
 {
     using Serv = LineEngine.Services;
     using Timer = LineEngine.Timer;
+    using PO = LineEngine.PositionedObject;
     /// <summary>
     /// After 40,000 points only small UFOs spawn.
     /// A steadily decreasing timer that shortens intervals between saucer spawns on each UFO.
@@ -16,16 +18,18 @@ namespace Asteroids
     {
         GraphicsDeviceManager m_GraphicsDM;
         Player m_Player;
-        LineEngine.PositionedObject m_PlayerClear;
+        PO m_PlayerClear;
         UFO m_UFO;
         Timer m_UFOTimer;
         List<Rock> m_LargeRocks;
         List<Rock> m_MedRocks;
         List<Rock> m_SmallRocks;
+        SoundEffect m_RockExplode;
+        Word m_GameOverHUD;
         readonly float m_UFOTimerSeedAmount = 10.15f;
-        int m_UFOCount = 0;
-        int m_Wave = 0;
-        int m_LargeRockCount = 4;
+        int m_UFOCount;
+        int m_Wave;
+        int m_LargeRockCount;
 
         public Game()
         {
@@ -37,14 +41,15 @@ namespace Asteroids
             screenSize.X = m_GraphicsDM.PreferredBackBufferWidth = 1200;
             screenSize.Y = m_GraphicsDM.PreferredBackBufferHeight = 900;
             IsFixedTimeStep = false;
-            Content.RootDirectory = "Media";
             m_Player = new Player(this);
-            m_PlayerClear = new LineEngine.PositionedObject(this);
+            m_PlayerClear = new PO(this);
             m_UFO = new UFO(this);
             m_UFOTimer = new Timer(this);
+            m_GameOverHUD = new Word(this);
             m_LargeRocks = new List<Rock>();
             m_MedRocks = new List<Rock>();
             m_SmallRocks = new List<Rock>();
+            Content.RootDirectory = "Content";
         }
         /// <summary>
         /// Allows the game to perform any initialization it needs to before starting to run.
@@ -57,13 +62,6 @@ namespace Asteroids
             Serv.Initialize(m_GraphicsDM, this);
 
             base.Initialize();
-
-            m_UFOTimer.Reset();
-            m_UFOTimer.Amount = m_UFOTimerSeedAmount;
-            m_UFO.Initialize(m_Player);
-
-            m_PlayerClear.Radius = 150;
-            m_PlayerClear.Moveable = false;
         }
 
         /// <summary>
@@ -72,6 +70,15 @@ namespace Asteroids
         /// </summary>
         protected override void LoadContent()
         {
+            m_Player.LoadSounds(Content.Load<SoundEffect>("AsteroidsPlayerFire"),
+                Content.Load<SoundEffect>("AsteroidsPlayerExplosion"), Content.Load<SoundEffect>("AsteroidsBonusShip"),
+                Content.Load<SoundEffect>("AsteroidsThrust"));
+
+            m_UFO.LoadSounds(Content.Load<SoundEffect>("AsteroidsUFOExplosion"),
+                Content.Load<SoundEffect>("AsteroidsUFOShot"), Content.Load<SoundEffect>("AsteroidsUFOLarge"),
+                Content.Load<SoundEffect>("AsteroidsUFOSmall"));
+
+            m_RockExplode = Content.Load<SoundEffect>("AsteroidsRockExplosion");
         }
 
         /// <summary>
@@ -93,6 +100,15 @@ namespace Asteroids
 
             m_Player.BeginRun();
             m_Player.UFO = m_UFO;
+            m_Player.GameOver = true;
+            m_Player.Active = false;
+            m_UFOTimer.Reset();
+            m_UFOTimer.Amount = m_UFOTimerSeedAmount;
+            m_UFO.Initialize(m_Player);
+            m_PlayerClear.Radius = 150;
+            m_PlayerClear.Moveable = false;
+            SpawnLargeRocks(4);
+            m_GameOverHUD.ProcessWords("GAME OVER", new Vector3(0, 160, 0), 10);
         }
 
         /// <summary>
@@ -102,12 +118,15 @@ namespace Asteroids
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
+            base.Update(gameTime);
 #if DEBUG
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 #endif
             if (m_Player.GameOver)
             {
+                m_GameOverHUD.ShowWords();
+
                 if (Keyboard.GetState().IsKeyDown(Keys.N))
                 {
                     m_Player.GameOver = false;
@@ -123,9 +142,6 @@ namespace Asteroids
             }
 
             CountRocks();
-
-            base.Update(gameTime);
-
             UFOController();
         }
 
@@ -193,6 +209,7 @@ namespace Asteroids
 
         void NewGame()
         {
+            m_GameOverHUD.HideWords();
             m_Player.NewGame();
             ResetUFO();
 
@@ -211,7 +228,8 @@ namespace Asteroids
                 m_SmallRocks[i].Active = false;
             }
 
-            m_Wave = 0;            
+            m_Wave = 0;
+            m_UFOCount = 0;
             SpawnLargeRocks(m_LargeRockCount = 4);
         }
 
@@ -291,12 +309,10 @@ namespace Asteroids
 
             if (rockCount == 0)
             {
-                SpawnLargeRocks(m_LargeRockCount);
-                m_LargeRockCount += 2;
+                if (m_LargeRockCount > 10)
+                    m_LargeRockCount = 10;
 
-                if (m_LargeRockCount > 11)
-                    m_LargeRockCount = 11;
-
+                SpawnLargeRocks(m_LargeRockCount += 2);
                 m_Wave++;
             }
         }
@@ -328,6 +344,7 @@ namespace Asteroids
                     m_LargeRocks[rock].UFO = m_UFO;
                     m_LargeRocks[rock].Spawn();
                     m_LargeRocks[rock].Position = Serv.SetRandomEdge();
+                    m_LargeRocks[rock].LoadSound(m_RockExplode);
                 }
             }
         }
@@ -353,6 +370,7 @@ namespace Asteroids
                     int rock = m_MedRocks.Count;
                     m_MedRocks.Add(new Rock(this));
                     m_MedRocks[rock].Spawn(position, 0.5f, 150, 50, m_Player, m_UFO);
+                    m_MedRocks[rock].LoadSound(m_RockExplode);
                 }
             }
         }
@@ -378,6 +396,7 @@ namespace Asteroids
                     int rock = m_SmallRocks.Count;
                     m_SmallRocks.Add(new Rock(this));
                     m_SmallRocks[rock].Spawn(position, 0.25f, 300, 100, m_Player, m_UFO);
+                    m_SmallRocks[rock].LoadSound(m_RockExplode);
                 }
             }
 

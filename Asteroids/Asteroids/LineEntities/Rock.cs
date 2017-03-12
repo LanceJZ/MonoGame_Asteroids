@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
+﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 
 namespace Asteroids
 {
@@ -15,9 +10,9 @@ namespace Asteroids
         Player m_Player;
         UFO m_UFO;
         Explode m_Explosion;
+        SoundEffect m_Explode;
         int m_Points = 20;
         float m_Speed = 75;
-        bool m_ExplosionDone;
 
         public Player Player
         {
@@ -72,6 +67,11 @@ namespace Asteroids
                 CheckBorders();
                 CheckCollusions();
             }
+        }
+
+        public void LoadSound(SoundEffect explode)
+        {
+            m_Explode = explode;
         }
 
         void InitializeLineMesh()
@@ -160,11 +160,13 @@ namespace Asteroids
         {
             Active = true;
             Velocity = Serv.SetRandomVelocity(m_Speed);
-            GameOver = Player.GameOver;
         }
 
         void Explode()
         {
+            if (!m_Player.GameOver)
+                m_Explode.Play(0.15f, 0, 0);
+
             m_Explosion.Spawn(Position, Radius);
             Hit = true;
         }

@@ -25,7 +25,6 @@ namespace Asteroids.LineEngine
         bool m_Hit = false;
         bool m_ExplosionActive = false;
         bool m_Pause = false;
-        bool m_GameOver = false;
         bool m_Moveable = true;
         bool m_Active = true;
         #endregion
@@ -133,19 +132,6 @@ namespace Asteroids.LineEngine
             set
             {
                 m_Pause = value;
-            }
-        }
-
-        public bool GameOver
-        {
-            get
-            {
-                return m_GameOver;
-            }
-
-            set
-            {
-                m_GameOver = value;
             }
         }
 

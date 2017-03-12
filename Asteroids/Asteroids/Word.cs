@@ -11,15 +11,16 @@ namespace Asteroids
 
     public class Word : LineEngine.PositionedObject
     {
+        Game m_Game;
         WordData[] Letters = new WordData[27];
         Vector3[] m_LetterLineStart = new Vector3[16];
         Vector3[] m_LetterLineEnd = new Vector3[16];
         public List<LineEngine.PositionedObject> m_Words;
-        public List<LineEngine.LineMesh> m_Letters;
+        public List<LineEngine.LineMesh> m_EachLine;
 
         public Word(Game game) : base(game)
         {
-
+            m_Game = game;
         }
 
         public override void Initialize()
@@ -33,89 +34,101 @@ namespace Asteroids
 
             InitializeWordLines();
             m_Words = new List<LineEngine.PositionedObject>();
-            m_Letters = new List<LineEngine.LineMesh>();
-        }
-
-
-        public override void Update(GameTime gametime)
-        {
-            // Do stuff every new frame
+            m_EachLine = new List<LineEngine.LineMesh>();
         }
 
         public void ProcessWords(string words, Vector3 locationStart, float size)
         {
-            if (m_Words != null)
+            DeleteWords();
+            Position = locationStart;
+            int textSize = words.Length;
+            float charsize = 1.55f;
+            float space = ((-size * charsize) * (textSize - 1)) / 2;
+
+            foreach (char letter in words)
             {
-                DeleteWords();
-                int textSize = words.Length;
-                float charsize = 3.15f;
-                float space = ((-size * charsize) * (textSize - 1)) / 2;
-
-                foreach (char letter in words)
+                if ((int)letter > 64 && (int)letter < 91 || (int)letter == 95)
                 {
-                    if ((int)letter > 64 && (int)letter < 91 || (int)letter == 95)
+                    int asciiCode = (int)letter - 65;
+
+                    if ((int)letter == 95)
+                        asciiCode = 26;
+
+                    if (asciiCode > -1 && asciiCode < 27)
                     {
-                        int letval = (int)letter - 65;
-
-                        if ((int)letter == 95)
-                            letval = 26;
-
-                        if (letval > -1 && letval < 27)
-                        {
-                            MakeLetterMesh(space, letval, size);
-                        }
+                        MakeLetterMesh(space, asciiCode, size);
                     }
-
-                    space -= size * charsize;
                 }
 
+                space += size * charsize;
             }
         }
 
         void MakeLetterMesh(float location, int letter, float size)
         {
+            Vector3[] letterLine = new Vector3[2];
+
             for (int line = 0; line < 16; line++)
             {
                 if (Letters[letter].Lines[line])
                 {
                     float Xstart = m_LetterLineStart[line].X * size + location;
-                    float Ystart = m_LetterLineStart[line].Y * size;
+                    float Ystart = m_LetterLineStart[line].Y * size * 0.7f;
 
                     float Xend = m_LetterLineEnd[line].X * size + location;
-                    float Yend = m_LetterLineEnd[line].Y * size;
+                    float Yend = m_LetterLineEnd[line].Y * size * 0.7f;
 
-                    Vector3 start = new Vector3(Xstart, Ystart, 0);
-                    Vector3 end = new Vector3(Xend, Yend, 0);
+                    letterLine[0] = new Vector3(Xstart, Ystart, 0);
+                    letterLine[1] = new Vector3(Xend, Yend, 0);
 
-
+                    m_EachLine.Add(new LineEngine.LineMesh(m_Game));
+                    m_EachLine[m_EachLine.Count - 1].Position = Position + new Vector3(location, 0, 0);
+                    m_EachLine[m_EachLine.Count - 1].InitializePoints(letterLine);
+                    m_EachLine[m_EachLine.Count - 1].Moveable = false;
                 }
             }
         }
 
         public void DeleteWords()
         {
-            m_Words.Clear();
-            m_Letters.Clear();
+            if (m_Words.Count > 0)
+                m_Words.Clear();
+
+            if (m_EachLine.Count > 0)
+            {
+                foreach (LineEngine.LineMesh line in m_EachLine)
+                {
+                    line.Active = false;
+                    line.Enabled = false;
+                    line.Remove();
+                    line.Destroy();
+                }
+
+                m_EachLine.Clear();
+            }
         }
 
         public void HideWords()
         {
-            if (m_Letters != null)
+            if (m_EachLine != null)
             {
-                foreach (LineEngine.LineMesh word in m_Letters)
+                foreach (LineEngine.LineMesh line in m_EachLine)
                 {
-                    word.Active = false;
+                    line.Active = false;
+                    line.Enabled = false;
+                    
                 }
             }
         }
 
         public void ShowWords()
         {
-            if (m_Letters != null)
+            if (m_EachLine != null)
             {
-                foreach (LineEngine.LineMesh word in m_Letters)
+                foreach (LineEngine.LineMesh line in m_EachLine)
                 {
-                    word.Active = true;
+                    line.Active = true;
+                    line.Enabled = true;
                 }
             }
         }
@@ -123,38 +136,38 @@ namespace Asteroids
         void InitializeWordLines()
         {
             m_LetterLineStart[0] = new Vector3(0, 0, 0); //1
-            m_LetterLineStart[1] = new Vector3(-1, 0, 0); //2
-            m_LetterLineStart[2] = new Vector3(-2, 0, 0); //3
-            m_LetterLineStart[3] = new Vector3(-2, -2, 0); //4
-            m_LetterLineStart[4] = new Vector3(-1, -4, 0); //5
+            m_LetterLineStart[1] = new Vector3(1, 0, 0); //2
+            m_LetterLineStart[2] = new Vector3(2, 0, 0); //3
+            m_LetterLineStart[3] = new Vector3(2, -2, 0); //4
+            m_LetterLineStart[4] = new Vector3(1, -4, 0); //5
             m_LetterLineStart[5] = new Vector3(0, -4, 0); //6
             m_LetterLineStart[6] = new Vector3(0, -2, 0); //7
             m_LetterLineStart[7] = new Vector3(0, 0, 0); //8
             m_LetterLineStart[8] = new Vector3(0, 0, 0); //9
-            m_LetterLineStart[9] = new Vector3(-2, 0, 0); //10
-            m_LetterLineStart[10] = new Vector3(-1, -2, 0); //11
-            m_LetterLineStart[11] = new Vector3(-1, -2, 0); //12
-            m_LetterLineStart[12] = new Vector3(-1, -2, 0); //13
+            m_LetterLineStart[9] = new Vector3(2, 0, 0); //10
+            m_LetterLineStart[10] = new Vector3(1, -2, 0); //11
+            m_LetterLineStart[11] = new Vector3(1, -2, 0); //12
+            m_LetterLineStart[12] = new Vector3(1, -2, 0); //13
             m_LetterLineStart[13] = new Vector3(0, -2, 0); //14
-            m_LetterLineStart[14] = new Vector3(-1, 0, 0); //15
-            m_LetterLineStart[15] = new Vector3(-1, -2, 0); //16
+            m_LetterLineStart[14] = new Vector3(1, 0, 0); //15
+            m_LetterLineStart[15] = new Vector3(1, -2, 0); //16
 
-            m_LetterLineEnd[0] = new Vector3(-1, 0, 0); //1
-            m_LetterLineEnd[1] = new Vector3(-2, 0, 0); //2
-            m_LetterLineEnd[2] = new Vector3(-2, -2, 0); //3
-            m_LetterLineEnd[3] = new Vector3(-2, -4, 0); //4
-            m_LetterLineEnd[4] = new Vector3(-2, -4, 0); //5
-            m_LetterLineEnd[5] = new Vector3(-1, -4, 0); //6
+            m_LetterLineEnd[0] = new Vector3(1, 0, 0); //1
+            m_LetterLineEnd[1] = new Vector3(2, 0, 0); //2
+            m_LetterLineEnd[2] = new Vector3(2, -2, 0); //3
+            m_LetterLineEnd[3] = new Vector3(2, -4, 0); //4
+            m_LetterLineEnd[4] = new Vector3(2, -4, 0); //5
+            m_LetterLineEnd[5] = new Vector3(1, -4, 0); //6
             m_LetterLineEnd[6] = new Vector3(0, -4, 0); //7
             m_LetterLineEnd[7] = new Vector3(0, -2, 0); //8
-            m_LetterLineEnd[8] = new Vector3(-1, -2, 0); //9
-            m_LetterLineEnd[9] = new Vector3(-1, -2, 0); //10
-            m_LetterLineEnd[10] = new Vector3(-2, -2, 0); //11
-            m_LetterLineEnd[11] = new Vector3(-2, -4, 0); //12
+            m_LetterLineEnd[8] = new Vector3(1, -2, 0); //9
+            m_LetterLineEnd[9] = new Vector3(1, -2, 0); //10
+            m_LetterLineEnd[10] = new Vector3(2, -2, 0); //11
+            m_LetterLineEnd[11] = new Vector3(2, -4, 0); //12
             m_LetterLineEnd[12] = new Vector3(0, -4, 0); //13
-            m_LetterLineEnd[13] = new Vector3(-1, -2, 0); //14
-            m_LetterLineEnd[14] = new Vector3(-1, -2, 0); //15
-            m_LetterLineEnd[15] = new Vector3(-1, -4, 0); //16
+            m_LetterLineEnd[13] = new Vector3(1, -2, 0); //14
+            m_LetterLineEnd[14] = new Vector3(1, -2, 0); //15
+            m_LetterLineEnd[15] = new Vector3(1, -4, 0); //16
 
             // A
             Letters[0].Lines[0] = true;

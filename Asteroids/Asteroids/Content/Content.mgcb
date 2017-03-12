@@ -13,3 +13,57 @@
 
 #---------------------------------- Content ---------------------------------#
 
+#begin AsteroidsPlayerFire.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:AsteroidsPlayerFire.wav
+
+#begin AsteroidsThrust.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:AsteroidsThrust.wav
+
+#begin AsteroidsBonusShip.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:AsteroidsBonusShip.wav
+
+#begin AsteroidsPlayerExplosion.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:AsteroidsPlayerExplosion.wav
+
+#begin AsteroidsRockExplosion.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:AsteroidsRockExplosion.wav
+
+#begin AsteroidsUFOLarge.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:AsteroidsUFOLarge.wav
+
+#begin AsteroidsUFOExplosion.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:AsteroidsUFOExplosion.wav
+
+#begin AsteroidsUFOShot.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:AsteroidsUFOShot.wav
+
+#begin AsteroidsUFOSmall.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:AsteroidsUFOSmall.wav
+
