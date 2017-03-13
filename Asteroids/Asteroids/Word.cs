@@ -42,7 +42,7 @@ namespace Asteroids
             DeleteWords();
             Position = locationStart;
             int textSize = words.Length;
-            float charsize = 1.55f;
+            float charsize = 1.15f;
             float space = ((-size * charsize) * (textSize - 1)) / 2;
 
             foreach (char letter in words)
@@ -72,11 +72,11 @@ namespace Asteroids
             {
                 if (Letters[letter].Lines[line])
                 {
-                    float Xstart = m_LetterLineStart[line].X * size + location;
-                    float Ystart = m_LetterLineStart[line].Y * size * 0.7f;
+                    float Xstart = m_LetterLineStart[line].X * size * 0.6f + location;
+                    float Ystart = m_LetterLineStart[line].Y * size * 0.5f;
 
-                    float Xend = m_LetterLineEnd[line].X * size + location;
-                    float Yend = m_LetterLineEnd[line].Y * size * 0.7f;
+                    float Xend = m_LetterLineEnd[line].X * size * 0.6f + location;
+                    float Yend = m_LetterLineEnd[line].Y * size * 0.5f;
 
                     letterLine[0] = new Vector3(Xstart, Ystart, 0);
                     letterLine[1] = new Vector3(Xend, Yend, 0);

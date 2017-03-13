@@ -25,7 +25,8 @@ namespace Asteroids
         List<Rock> m_MedRocks;
         List<Rock> m_SmallRocks;
         SoundEffect m_RockExplode;
-        Word m_GameOverHUD;
+        Word m_AtariHUD;
+        Number m_AtariDate;
         readonly float m_UFOTimerSeedAmount = 10.15f;
         int m_UFOCount;
         int m_Wave;
@@ -45,7 +46,8 @@ namespace Asteroids
             m_PlayerClear = new PO(this);
             m_UFO = new UFO(this);
             m_UFOTimer = new Timer(this);
-            m_GameOverHUD = new Word(this);
+            m_AtariHUD = new Word(this);
+            m_AtariDate = new Number(this);
             m_LargeRocks = new List<Rock>();
             m_MedRocks = new List<Rock>();
             m_SmallRocks = new List<Rock>();
@@ -106,9 +108,10 @@ namespace Asteroids
             m_UFOTimer.Amount = m_UFOTimerSeedAmount;
             m_UFO.Initialize(m_Player);
             m_PlayerClear.Radius = 150;
-            m_PlayerClear.Moveable = false;
+            m_PlayerClear.Moveable = false;            
             SpawnLargeRocks(4);
-            m_GameOverHUD.ProcessWords("GAME OVER", new Vector3(0, 160, 0), 10);
+            m_AtariHUD.ProcessWords("ATARI INC", new Vector3(34, (-Serv.WindowHeight * 0.5f) + 20, 0), 5);
+            m_AtariDate.ProcessNumber(1979, new Vector3(-34, (-Serv.WindowHeight * 0.5f) + 20, 0), 5);
         }
 
         /// <summary>
@@ -125,8 +128,6 @@ namespace Asteroids
 #endif
             if (m_Player.GameOver)
             {
-                m_GameOverHUD.ShowWords();
-
                 if (Keyboard.GetState().IsKeyDown(Keys.N))
                 {
                     m_Player.GameOver = false;
@@ -209,7 +210,6 @@ namespace Asteroids
 
         void NewGame()
         {
-            m_GameOverHUD.HideWords();
             m_Player.NewGame();
             ResetUFO();
 

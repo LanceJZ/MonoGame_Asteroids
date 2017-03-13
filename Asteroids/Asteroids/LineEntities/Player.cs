@@ -26,6 +26,7 @@ namespace Asteroids
         LineExplode m_Explosion;
         Number m_ScoreHUD;
         Number m_HiScoreHUD;
+        HighScores m_HighScoreList;
         int m_Score;
         int m_HiScore;
         int m_NextBonusLife;
@@ -102,6 +103,7 @@ namespace Asteroids
             m_HiScoreHUD.Moveable = false;
             m_ShipLives = new List<PlayerShip>();
             m_Explosion = new LineExplode(game);
+            m_HighScoreList = new HighScores(game);
 
             for (int i = 0; i < 4; i++)
             {
@@ -130,17 +132,15 @@ namespace Asteroids
             m_Flame.Active = false;
             Radius = m_Ship.Radius;
             ShipLivesDisplay();
+            m_HighScoreList.BeginRun();
+            m_HiScore = m_HighScoreList.HighScore;
+            m_HiScoreHUD.ProcessNumber(m_HiScore, new Vector3(0, 440, 0), 8);
+            m_ScoreHUD.ProcessNumber(m_Score, new Vector3(-400, 440, 0), 10);
         }
 
         public override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
-
-            if (Hit)
-            {
-                LostLife();
-                Hit = false;
-            }
 
             if (m_Exploding)
             {
@@ -164,6 +164,12 @@ namespace Asteroids
 
             if (Active)
             {
+                if (Hit)
+                {
+                    LostLife();
+                    Hit = false;
+                }
+
                 CheckBorders();
                 KeyInput();
                 m_Flame.Position = Position;
@@ -171,7 +177,6 @@ namespace Asteroids
                 m_Ship.Position = Position;
                 m_Ship.RotationInRadians = RotationInRadians;
             }
-
         }
 
         public void CheckCollision()
@@ -216,6 +221,7 @@ namespace Asteroids
             m_Ship.Active = true;
             ResetShip();
             SetScore(0);
+            m_HighScoreList.NewGame();
         }
 
         public void LoadSounds(SoundEffect fireshot, SoundEffect explode, SoundEffect bonus, SoundEffect thurst)
@@ -254,6 +260,8 @@ namespace Asteroids
             if (m_Lives < 1)
             {
                 GameOver = true;
+                m_HighScoreList.GameOver(m_Score);
+                m_HiScore = m_HighScoreList.HighScore;
             }
 
             ShipLivesDisplay();

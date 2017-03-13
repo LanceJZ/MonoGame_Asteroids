@@ -119,6 +119,10 @@ namespace Asteroids
                             m_Large.Play(0.15f, 0, 0);
                         }
                     }
+
+                    CheckBorders();
+                    TimeToChangeVectorYet();
+                    TimeToShotYet();
                 }
 
                 if (Position.X > Serv.WindowWidth * 0.5f || Position.X < -Serv.WindowWidth * 0.5f)
@@ -126,9 +130,6 @@ namespace Asteroids
                     Done = true;
                 }
 
-                CheckBorders();
-                TimeToChangeVectorYet();
-                TimeToShotYet();
                 CheckColusion();
             }
         }
@@ -183,22 +184,34 @@ namespace Asteroids
         {
             if (m_Player.Active)
             {
-                if (CirclesIntersect(m_Player.Position, m_Player.Radius))
+                if (Active)
                 {
-                    Explode();
-                    m_Player.Hit = true;
-                }
-            }
-
-            for (int i = 0; i < 4; i++)
-            {
-                if (m_Player.Shots[i].Active)
-                {
-                    if (CirclesIntersect(m_Player.Shots[i].Position, m_Player.Shots[i].Radius))
+                    if (CirclesIntersect(m_Player.Position, m_Player.Radius))
                     {
-                        m_Player.Shots[i].Active = false;
-                        m_Player.SetScore(m_Points);
                         Explode();
+                        m_Player.Hit = true;
+                    }
+
+                    for (int i = 0; i < 4; i++)
+                    {
+                        if (m_Player.Shots[i].Active)
+                        {
+                            if (CirclesIntersect(m_Player.Shots[i].Position, m_Player.Shots[i].Radius))
+                            {
+                                m_Player.Shots[i].Active = false;
+                                m_Player.SetScore(m_Points);
+                                Explode();
+                            }
+                        }
+                    }
+                }
+
+                if (m_Shot.Active)
+                {
+                    if (m_Shot.CirclesIntersect(m_Player.Position, m_Player.Radius))
+                    {
+                        m_Shot.Active = false;
+                        m_Player.Hit = true;
                     }
                 }
             }

@@ -44,7 +44,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Game.cs" />
-    <Compile Include="Game1.cs" />
+    <Compile Include="HighScores.cs" />
     <Compile Include="LineEngine\IDrawComponent.cs" />
     <Compile Include="LineEngine\LineMesh.cs" />
     <Compile Include="LineEngine\PositionedObject.cs" />
