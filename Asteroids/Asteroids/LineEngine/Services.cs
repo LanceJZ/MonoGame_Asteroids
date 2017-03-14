@@ -20,7 +20,6 @@ namespace Asteroids.LineEngine
         private static Matrix m_WorldMatrix;
         private static Vector2 m_ScreenSize;
         private static List<IDrawComponent> m_DrawableComponents;
-        private static Game m_Game;
         #endregion
         #region Properties
         /// <summary>
@@ -65,7 +64,7 @@ namespace Asteroids.LineEngine
         public static void AddDrawableComponent(IDrawComponent drawableComponent)
         {
             m_DrawableComponents.Add(drawableComponent);
-            
+
         }
 
         /// <summary>
@@ -138,7 +137,7 @@ namespace Asteroids.LineEngine
             base.Draw(gameTime);
 
             foreach(IDrawComponent drawable in m_DrawableComponents)
-            {                
+            {
                 drawable.Draw(gameTime);
             }
         }
@@ -146,7 +145,7 @@ namespace Asteroids.LineEngine
         /// This is used to start up Panther Engine Services.
         /// It makes sure that it has not already been started if it has been it will throw and exception
         /// to let the user know.
-        /// 
+        ///
         /// You pass in the game class so you can get information needed.
         /// </summary>
         /// <param name="graphics">Reference to the graphic device.</param>

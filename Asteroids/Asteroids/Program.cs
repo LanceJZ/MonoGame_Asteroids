@@ -2,6 +2,7 @@
 
 namespace Asteroids
 {
+#if WINDOWS || LINUX
     /// <summary>
     /// The main class.
     /// </summary>
@@ -17,4 +18,5 @@ namespace Asteroids
                 game.Run();
         }
     }
+#endif
 }

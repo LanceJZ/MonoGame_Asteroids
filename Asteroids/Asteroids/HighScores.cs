@@ -89,17 +89,21 @@ namespace Asteroids
             }
         }
     }
-    
+
     public class HighScores : GameComponent
     {
         HighScoreList[] m_HighScoreData = new HighScoreList[10];
         HighScoreListLines[] m_HighScoreDisplay = new HighScoreListLines[10];
         Word m_GameOverHUD;
+        Word m_CoinPlayHUD;
         Word m_HighScoreHUD;
+        Word m_PushStartHUD;
         Word[] m_EnterInitials = new Word[4];
         Word m_NewHighScoreLetters;
+        Number[] m_CoinPlayOnes = new Number[2];
         Timer m_HighScoreTimer;
         Timer m_GameOverTimer;
+        Timer m_PushStartTimer;
         FileStream m_FileStream;
         char[] m_HighScoreSelectedLetters = new char[3];
         string m_FileName = "Score.sav";
@@ -113,6 +117,7 @@ namespace Asteroids
         bool m_KeyLeftDown = false;
         bool m_KeyRightDown = false;
         bool m_KeyDownDown = false;
+        bool m_GameOverDisplayed = false;
 
         public int HighScore
         {
@@ -133,23 +138,31 @@ namespace Asteroids
                 m_HighScoreDisplay[i].Rank = new Number(game);
             }
 
-            m_HighScoreHUD = new Word(game);
-            m_GameOverHUD = new Word(game);
-
             for (int i = 0; i < 4; i++)
             {
                 m_EnterInitials[i] = new Word(game);
             }
 
+            for (int i = 0; i < 2; i++)
+            {
+                m_CoinPlayOnes[i] = new Number(game);
+            }
+
+            m_HighScoreHUD = new Word(game);
+            m_GameOverHUD = new Word(game);
+            m_PushStartHUD = new Word(game);
+            m_CoinPlayHUD = new Word(game);
             m_NewHighScoreLetters = new Word(game);
             m_HighScoreTimer = new Timer(game);
             m_GameOverTimer = new Timer(game);
+            m_PushStartTimer = new Timer(game);
         }
 
         public override void Initialize()
         {
             m_HighScoreTimer.Amount = 15;
             m_GameOverTimer.Amount = 5;
+            m_PushStartTimer.Amount = 0.666f;
             m_EnterYourInitials[0] = "YOUR SCORE IS ONE OF THE TEN BEST";
             m_EnterYourInitials[1] = "PLEASE ENTER YOUR INITIALS";
             m_EnterYourInitials[2] = "PUSH ROTATE TO SELECT LETTER";
@@ -164,18 +177,56 @@ namespace Asteroids
             {
                 if (!m_IsThereANewHighScore)
                 {
-                    if (m_HighScoreTimer.Seconds > m_HighScoreTimer.Amount)
+                    if (m_HighScoreData[0].Score > 0)
+                    {
+                        if (m_HighScoreTimer.Seconds > m_HighScoreTimer.Amount)
+                        {
+                            HideScoreList();
+                            m_GameOverDisplayed = true;
+                            m_GameOverHUD.ShowWords();
+                            m_CoinPlayHUD.ShowWords();
+                            m_CoinPlayOnes[0].ShowNumbers();
+                            m_CoinPlayOnes[1].ShowNumbers();
+                            m_HighScoreTimer.Reset();
+                            m_GameOverTimer.Reset();
+                        }
+                        else if (m_GameOverTimer.Seconds > m_GameOverTimer.Amount)
+                        {
+                            ShowScoreList();
+                            m_GameOverDisplayed = false;
+                            m_PushStartHUD.HideWords();
+                            m_GameOverHUD.HideWords();
+                            m_CoinPlayHUD.HideWords();
+                            m_CoinPlayOnes[0].HideNumbers();
+                            m_CoinPlayOnes[1].HideNumbers();
+                            m_GameOverTimer.Reset();
+                        }
+                    }
+                    else
                     {
                         HideScoreList();
+                        m_GameOverDisplayed = true;
                         m_GameOverHUD.ShowWords();
-                        m_HighScoreTimer.Reset();
-                        m_GameOverTimer.Reset();
+                        m_CoinPlayHUD.ShowWords();
+                        m_CoinPlayOnes[0].ShowNumbers();
+                        m_CoinPlayOnes[1].ShowNumbers();
                     }
-                    else if (m_GameOverTimer.Seconds > m_GameOverTimer.Amount)
+
+                    if (m_GameOverDisplayed)
                     {
-                        ShowScoreList();
-                        m_GameOverHUD.HideWords();
-                        m_GameOverTimer.Reset();
+                        if (m_PushStartTimer.Seconds > m_PushStartTimer.Amount)
+                        {
+                            m_PushStartTimer.Reset();
+
+                            if (m_PushStartHUD.Active)
+                            {
+                                m_PushStartHUD.HideWords();
+                            }
+                            else
+                            {
+                                m_PushStartHUD.ShowWords();
+                            }
+                        }
                     }
                 }
                 else
@@ -196,6 +247,15 @@ namespace Asteroids
             m_HighScoreHUD.ProcessWords("HIGH SCORES", new Vector3(0, LineEngine.Services.WindowHeight * 0.5f - 140, 0), 12);
             m_GameOverHUD.ProcessWords("GAME OVER", new Vector3(0, (Serv.WindowHeight * 0.5f) * 0.3666f, 0), 14);
             m_GameOverHUD.HideWords();
+            m_PushStartHUD.ProcessWords("PUSH START", new Vector3(0, (Serv.WindowHeight * 0.5f) * 0.666f, 0), 12);
+            m_PushStartHUD.HideWords();
+            float coinsY = (-Serv.WindowHeight * 0.5f) * 0.4666f;
+            m_CoinPlayHUD.ProcessWords("COIN   PLAY", new Vector3(0, coinsY, 0), 12);
+            m_CoinPlayHUD.HideWords();
+            m_CoinPlayOnes[0].ProcessNumber(1, new Vector3(-200, coinsY, 0), 12);
+            m_CoinPlayOnes[1].ProcessNumber(1, new Vector3(-10, coinsY, 0), 12);
+            m_CoinPlayOnes[0].HideNumbers();
+            m_CoinPlayOnes[1].HideNumbers();
 
             for (int i = 0; i < 4; i++)
             {
@@ -231,8 +291,13 @@ namespace Asteroids
         public void NewGame()
         {
             m_GameOver = false;
+            m_GameOverDisplayed = false;
             HideScoreList();
             m_GameOverHUD.HideWords();
+            m_CoinPlayHUD.HideWords();
+            m_CoinPlayOnes[0].HideNumbers();
+            m_CoinPlayOnes[1].HideNumbers();
+            m_PushStartHUD.HideWords();
             m_HighScoreSelectedLetters = "___".ToCharArray();
         }
 

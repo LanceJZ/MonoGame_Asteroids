@@ -21,37 +21,62 @@ namespace Asteroids
         PO m_PlayerClear;
         UFO m_UFO;
         Timer m_UFOTimer;
+        Timer m_BackOnePlay;
+        Timer m_BackTwoPlay;
+        Timer m_BackgroundOneDelay;
+        Timer m_BackgroundTwoDelay;
+        Timer m_GameWavePlayTime;
         List<Rock> m_LargeRocks;
         List<Rock> m_MedRocks;
         List<Rock> m_SmallRocks;
         SoundEffect m_RockExplode;
+        SoundEffect m_BackgroundOne;
+        SoundEffect m_BackgroundTwo;
         Word m_AtariHUD;
         Number m_AtariDate;
         readonly float m_UFOTimerSeedAmount = 10.15f;
+        readonly float m_BackgroundOneDelaySeed = 1;
+        readonly float m_BackgroundTwoDelaySeed = 2;
         int m_UFOCount;
         int m_Wave;
         int m_LargeRockCount;
+        bool m_PlayedOne = false;
+        bool m_PlayedTwo = false;
 
         public Game()
         {
             Vector2 screenSize = new Vector2();
             m_GraphicsDM = new GraphicsDeviceManager(this);
-            m_GraphicsDM.IsFullScreen = false;            
-            m_GraphicsDM.SynchronizeWithVerticalRetrace = false;
-            m_GraphicsDM.PreferMultiSampling = true;
+            m_GraphicsDM.IsFullScreen = false;
+            m_GraphicsDM.SynchronizeWithVerticalRetrace = true;
+            m_GraphicsDM.GraphicsProfile = GraphicsProfile.HiDef;
             screenSize.X = m_GraphicsDM.PreferredBackBufferWidth = 1200;
             screenSize.Y = m_GraphicsDM.PreferredBackBufferHeight = 900;
+            m_GraphicsDM.PreferMultiSampling = true; //Error in MonoGame 3.6 for DirectX, fixed for next version.
+            m_GraphicsDM.PreparingDeviceSettings += SetMultiSampling;
+            m_GraphicsDM.ApplyChanges();
             IsFixedTimeStep = false;
             m_Player = new Player(this);
             m_PlayerClear = new PO(this);
             m_UFO = new UFO(this);
             m_UFOTimer = new Timer(this);
+            m_BackOnePlay = new Timer(this);
+            m_BackTwoPlay = new Timer(this);
+            m_BackgroundOneDelay = new Timer(this);
+            m_BackgroundTwoDelay = new Timer(this);
+            m_GameWavePlayTime = new Timer(this);
             m_AtariHUD = new Word(this);
             m_AtariDate = new Number(this);
             m_LargeRocks = new List<Rock>();
             m_MedRocks = new List<Rock>();
             m_SmallRocks = new List<Rock>();
             Content.RootDirectory = "Content";
+        }
+
+        private void SetMultiSampling(object sender, PreparingDeviceSettingsEventArgs eventArgs)
+        {
+            PresentationParameters PresentParm = eventArgs.GraphicsDeviceInformation.PresentationParameters;
+            PresentParm.MultiSampleCount = 4;
         }
         /// <summary>
         /// Allows the game to perform any initialization it needs to before starting to run.
@@ -62,6 +87,11 @@ namespace Asteroids
         protected override void Initialize()
         {
             Serv.Initialize(m_GraphicsDM, this);
+
+            // The number determines how good our antialiasing works.
+            // Possible values are 2,4,8,16,32, but not all work on all computers.
+            // 4 is safe, and 8 is too in almost all cases
+            // Higher numbers mean lower framerates
 
             base.Initialize();
         }
@@ -81,6 +111,8 @@ namespace Asteroids
                 Content.Load<SoundEffect>("AsteroidsUFOSmall"));
 
             m_RockExplode = Content.Load<SoundEffect>("AsteroidsRockExplosion");
+            m_BackgroundOne = Content.Load<SoundEffect>("AsteroidsBackgroundOne");
+            m_BackgroundTwo = Content.Load<SoundEffect>("AsteroidsBackgroundTwo");
         }
 
         /// <summary>
@@ -108,7 +140,9 @@ namespace Asteroids
             m_UFOTimer.Amount = m_UFOTimerSeedAmount;
             m_UFO.Initialize(m_Player);
             m_PlayerClear.Radius = 150;
-            m_PlayerClear.Moveable = false;            
+            m_PlayerClear.Moveable = false;
+            m_BackOnePlay.Amount = m_BackgroundOne.Duration.Seconds;
+            m_BackTwoPlay.Amount = m_BackgroundTwo.Duration.Seconds;
             SpawnLargeRocks(4);
             m_AtariHUD.ProcessWords("ATARI INC", new Vector3(34, (-Serv.WindowHeight * 0.5f) + 20, 0), 5);
             m_AtariDate.ProcessNumber(1979, new Vector3(-34, (-Serv.WindowHeight * 0.5f) + 20, 0), 5);
@@ -141,6 +175,10 @@ namespace Asteroids
                     m_Player.Spawn = true;
                 }
             }
+            else
+            {
+                PlayBackground();
+            }
 
             CountRocks();
             UFOController();
@@ -155,6 +193,42 @@ namespace Asteroids
             GraphicsDevice.Clear(new Color(new Vector3(0.01666f, 0, 0.1f)));
 
             base.Draw(gameTime);
+        }
+
+        void PlayBackground()
+        {
+            if (m_BackgroundOneDelay.Seconds > m_BackgroundOneDelay.Amount)
+            {
+                m_BackgroundOneDelay.Reset();
+
+                if (m_BackgroundOneDelay.Amount > 0.25f)
+                    m_BackgroundOneDelay.Amount -= 0.025f;
+
+
+                if (m_BackOnePlay.Seconds > m_BackOnePlay.Amount && !m_PlayedOne)
+                {
+                    m_PlayedOne = true;
+                    m_PlayedTwo = false;
+                    m_BackOnePlay.Reset();
+                    m_BackgroundOne.Play(0.5f, 0, 0);
+                }
+            }
+
+            if (m_BackgroundTwoDelay.Seconds > m_BackgroundTwoDelay.Amount)
+            {
+                m_BackgroundTwoDelay.Reset();
+
+                if (m_BackgroundTwoDelay.Amount > 0.5f)
+                    m_BackgroundTwoDelay.Amount -= 0.025f;
+
+                if (m_BackTwoPlay.Seconds > m_BackTwoPlay.Amount && !m_PlayedTwo)
+                {
+                    m_PlayedOne = false;
+                    m_PlayedTwo = true;
+                    m_BackTwoPlay.Reset();
+                    m_BackgroundTwo.Play();
+                }
+            }
         }
 
         bool CheckPlayerClear()
@@ -231,6 +305,9 @@ namespace Asteroids
             m_Wave = 0;
             m_UFOCount = 0;
             SpawnLargeRocks(m_LargeRockCount = 4);
+            m_BackgroundOneDelay.Amount = m_BackgroundOneDelaySeed;
+            m_BackgroundTwoDelay.Amount = m_BackgroundTwoDelaySeed;
+
         }
 
         void UFOController()
@@ -290,7 +367,7 @@ namespace Asteroids
                         rock.Hit = false;
                     }
                 }
-                    
+
             }
 
             foreach (Rock rock in m_SmallRocks)
@@ -319,6 +396,7 @@ namespace Asteroids
 
         void SpawnLargeRocks(int count)
         {
+            m_GameWavePlayTime.Reset();
             m_Wave++;
 
             for (int i = 0; i < count; i++)

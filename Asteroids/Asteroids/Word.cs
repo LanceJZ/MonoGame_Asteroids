@@ -115,10 +115,11 @@ namespace Asteroids
                 foreach (LineEngine.LineMesh line in m_EachLine)
                 {
                     line.Active = false;
-                    line.Enabled = false;
-                    
+                    line.Enabled = false;                    
                 }
             }
+
+            Active = false;
         }
 
         public void ShowWords()
@@ -131,6 +132,8 @@ namespace Asteroids
                     line.Enabled = true;
                 }
             }
+
+            Active = true;
         }
 
         void InitializeWordLines()

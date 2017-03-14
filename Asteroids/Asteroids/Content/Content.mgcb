@@ -43,12 +43,6 @@
 /processorParam:Quality=Best
 /build:AsteroidsRockExplosion.wav
 
-#begin AsteroidsUFOLarge.wav
-/importer:WavImporter
-/processor:SoundEffectProcessor
-/processorParam:Quality=Best
-/build:AsteroidsUFOLarge.wav
-
 #begin AsteroidsUFOExplosion.wav
 /importer:WavImporter
 /processor:SoundEffectProcessor
@@ -61,9 +55,27 @@
 /processorParam:Quality=Best
 /build:AsteroidsUFOShot.wav
 
+#begin AsteroidsBackgroundOne.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:AsteroidsBackgroundOne.wav
+
 #begin AsteroidsUFOSmall.wav
 /importer:WavImporter
 /processor:SoundEffectProcessor
 /processorParam:Quality=Best
 /build:AsteroidsUFOSmall.wav
+
+#begin AsteroidsBackgroundTwo.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:AsteroidsBackgroundTwo.wav
+
+#begin AsteroidsUFOLarge.wav
+/importer:WavImporter
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:AsteroidsUFOLarge.wav
 

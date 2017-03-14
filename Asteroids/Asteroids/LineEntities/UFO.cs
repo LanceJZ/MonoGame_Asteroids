@@ -108,7 +108,7 @@ namespace Asteroids
                         if (m_SmallTimer.Seconds > m_SmallTimer.Amount)
                         {
                             m_SmallTimer.Reset();
-                            m_Small.Play(0.15f, 0, 0);
+                            m_Small.Play(0.5f, 0, 0);
                         }
                     }
                     else
@@ -116,13 +116,9 @@ namespace Asteroids
                         if (m_LargeTimer.Seconds > m_LargeTimer.Amount)
                         {
                             m_LargeTimer.Reset();
-                            m_Large.Play(0.15f, 0, 0);
+                            m_Large.Play(0.5f, 0, 0);
                         }
                     }
-
-                    CheckBorders();
-                    TimeToChangeVectorYet();
-                    TimeToShotYet();
                 }
 
                 if (Position.X > Serv.WindowWidth * 0.5f || Position.X < -Serv.WindowWidth * 0.5f)
@@ -130,6 +126,9 @@ namespace Asteroids
                     Done = true;
                 }
 
+                CheckBorders();
+                TimeToChangeVectorYet();
+                TimeToShotYet();
                 CheckColusion();
             }
         }
@@ -144,7 +143,7 @@ namespace Asteroids
 
             float spawnPercent = (float)(Math.Pow(0.915, (SpawnCount) / (Wave + 1)));
 
-            if (Serv.RandomMinMax(0, 99) < (m_PlayerScore / 400) + (spawnPercent * 100))
+            if (Serv.RandomMinMax(0, 99) < (m_PlayerScore / 400) + (spawnPercent * 100) || m_PlayerScore > 20000)
             {
                 m_SmallSoucer = false;
                 m_Points = 200;
@@ -168,7 +167,7 @@ namespace Asteroids
             {
                 Position.X = Serv.WindowWidth * 0.5f - 1;
                 Velocity.X = -m_Speed;
-            }            
+            }
         }
 
         public void Explode()
@@ -236,7 +235,7 @@ namespace Asteroids
         void FireShot()
         {
             if (!m_Player.GameOver)
-                m_FireShot.Play(0.25f, 0, 0);
+                m_FireShot.Play(0.4f, 0, 0);
 
             m_ShotTimer.Reset();
             float speed = 400;
@@ -246,8 +245,12 @@ namespace Asteroids
                 rad = Serv.RandomRadian();
             else
             {
-                //Adjust according to score.
-                rad = Serv.AngleFromVectors(Position, m_Player.Position) + Serv.RandomMinMax(-0.1f, 0.1f);
+                //Adjust accuracy according to score. By the time the score reaches 30,000, percent = 0.
+                float percent = 0.25f - (m_PlayerScore * 0.00001f);
+                if (percent < 0)
+                    percent = 0;
+
+                rad = Serv.AngleFromVectors(Position, m_Player.Position) + Serv.RandomMinMax(-percent, percent);
             }
 
             Vector3 dir = Serv.SetVelocity(rad, speed);

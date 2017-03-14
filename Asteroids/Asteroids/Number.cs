@@ -114,6 +114,8 @@ namespace Asteroids
                     num.Active = false;
                 }
             }
+
+            Active = false;
         }
 
         public void ShowNumbers()
@@ -125,6 +127,8 @@ namespace Asteroids
                     num.Active = true;
                 }
             }
+
+            Active = true;
         }
 
         void InitializeNumberLines()
