@@ -56,7 +56,6 @@ namespace Asteroids
         public override void Initialize()
         {
             base.Initialize();
-            InitializeLineMesh();
         }
 
         public override void Update(GameTime gameTime)
@@ -74,7 +73,7 @@ namespace Asteroids
             m_Explode = explode;
         }
 
-        void InitializeLineMesh()
+        protected override void InitializeLineMesh()
         {
             int rockType = (int)Serv.RandomMinMax(0, 3.99f);
 

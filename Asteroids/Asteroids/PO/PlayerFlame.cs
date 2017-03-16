@@ -11,10 +11,15 @@ namespace Asteroids
         public override void Initialize()
         {
             base.Initialize();
-            InitializeLineMesh();
         }
 
-        void InitializeLineMesh()
+        public override void BeginRun()
+        {
+            base.BeginRun();
+            Moveable = false;
+        }
+
+        protected override void InitializeLineMesh()
         {
             Vector3[] pointPosition = new Vector3[4];
 

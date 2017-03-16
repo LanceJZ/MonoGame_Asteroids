@@ -49,20 +49,20 @@
     <Compile Include="LineEngine\PositionedObject.cs" />
     <Compile Include="LineEngine\Services.cs" />
     <Compile Include="LineEngine\Timer.cs" />
-    <Compile Include="LineEntities\Dot.cs" />
-    <Compile Include="LineEntities\Explode.cs" />
-    <Compile Include="LineEntities\Line.cs" />
-    <Compile Include="LineEntities\LineExplode.cs" />
-    <Compile Include="Player.cs" />
-    <Compile Include="LineEntities\PlayerFlame.cs" />
-    <Compile Include="LineEntities\PlayerShip.cs" />
-    <Compile Include="LineEntities\Rock.cs" />
-    <Compile Include="LineEntities\Shot.cs" />
-    <Compile Include="LineEntities\UFO.cs" />
-    <Compile Include="Number.cs" />
+    <Compile Include="PO\Dot.cs" />
+    <Compile Include="PO\Explode.cs" />
+    <Compile Include="PO\Line.cs" />
+    <Compile Include="PO\LineExplode.cs" />
+    <Compile Include="PO\Player.cs" />
+    <Compile Include="PO\PlayerFlame.cs" />
+    <Compile Include="PO\PlayerShip.cs" />
+    <Compile Include="PO\Rock.cs" />
+    <Compile Include="PO\Shot.cs" />
+    <Compile Include="PO\UFO.cs" />
+    <Compile Include="PO\Number.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Word.cs" />
+    <Compile Include="PO\Word.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="MonoGame.Framework">

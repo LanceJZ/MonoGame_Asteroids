@@ -379,7 +379,7 @@ namespace Asteroids
 
             if (!m_KeyDownDown)
             {
-                if (Keyboard.GetState().IsKeyDown(Keys.Down))
+                if (Keyboard.GetState().IsKeyDown(Keys.Down) || Keyboard.GetState().IsKeyDown(Keys.LeftControl))
                 {
                     m_KeyDownDown = true;
                     m_HighScoreSelector++;
@@ -416,7 +416,7 @@ namespace Asteroids
             if (Keyboard.GetState().IsKeyUp(Keys.Left) && m_KeyLeftDown)
                 m_KeyLeftDown = false;
 
-            if (Keyboard.GetState().IsKeyUp(Keys.Down) && m_KeyDownDown)
+            if (Keyboard.GetState().IsKeyUp(Keys.Down) && Keyboard.GetState().IsKeyUp(Keys.LeftControl) && m_KeyDownDown)
                 m_KeyDownDown = false;
         }
 

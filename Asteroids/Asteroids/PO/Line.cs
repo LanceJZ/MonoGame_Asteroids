@@ -24,7 +24,6 @@ namespace Asteroids
         public override void Initialize()
         {
             base.Initialize();
-            InitializeLineMesh();
         }
 
         public void Spawn(Vector3 position, float radius)
@@ -39,7 +38,7 @@ namespace Asteroids
             Active = true;
         }
 
-        void InitializeLineMesh()
+        protected override void InitializeLineMesh()
         {
             Vector3[] pointPosition = new Vector3[2];
 

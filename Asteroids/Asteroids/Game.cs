@@ -312,17 +312,17 @@ namespace Asteroids
 
         void UFOController()
         {
+            if (m_UFO.Done || m_UFO.Hit)
+            {
+                ResetUFO();
+            }
+
             if (m_UFOTimer.Seconds > m_UFOTimer.Amount && !m_UFO.Active)
             {
                 m_UFOTimer.Amount = Serv.RandomMinMax(m_UFOTimerSeedAmount * 0.5f,
                     m_UFOTimerSeedAmount + (m_UFOTimerSeedAmount - m_Wave));
                 m_UFO.Spawn(m_UFOCount, m_Wave);
                 m_UFOCount++;
-            }
-
-            if (m_UFO.Done || m_UFO.Hit)
-            {
-                ResetUFO();
             }
         }
 

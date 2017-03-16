@@ -14,7 +14,6 @@ namespace Asteroids
         public override void Initialize()
         {
             base.Initialize();
-            InitializeLineMesh();
         }
 
         public override void Update(GameTime gameTime)
@@ -42,7 +41,7 @@ namespace Asteroids
             Active = false;
         }
 
-        void InitializeLineMesh()
+        protected override void InitializeLineMesh()
         {
             Vector3[] pointPosition = new Vector3[4];
 

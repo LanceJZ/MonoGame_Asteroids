@@ -79,7 +79,6 @@ namespace Asteroids
         public override void Initialize()
         {
             base.Initialize();
-            InitializeLineMesh();
 
             Position.X = Serv.WindowWidth;
         }
@@ -189,6 +188,7 @@ namespace Asteroids
                     {
                         Explode();
                         m_Player.Hit = true;
+                        m_Player.SetScore(m_Points);
                     }
 
                     for (int i = 0; i < 4; i++)
@@ -274,7 +274,7 @@ namespace Asteroids
             }
         }
 
-        void InitializeLineMesh()
+        protected override void InitializeLineMesh()
         {
             Vector3[] pointPosition = new Vector3[12];
 

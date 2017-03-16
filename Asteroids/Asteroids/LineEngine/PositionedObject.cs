@@ -1,5 +1,6 @@
 ﻿#region Using
 using System;
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 #endregion
 
@@ -9,13 +10,16 @@ namespace Asteroids.LineEngine
     {
         #region Fields
         private float m_FrameTime;
-        // Doing these as fields is almost twice as fast as if they were properties. 
+        // Doing these as fields is almost twice as fast as if they were properties.
         // Also, sense XYZ are fields they do not get data binned as a property.
         Game m_Game;
+        public List<PositionedObject> Children;
         public Vector3 Position;
         public Vector3 Acceleration;
         public Vector3 Velocity;
+        public Vector3 ReletivePosition;
         float m_RotationInRadians;
+        float m_ReletiveRotation;
         float m_ScalePercent = 1;
         float m_RotationVelocity;
         float m_RotationAcceleration;
@@ -27,6 +31,9 @@ namespace Asteroids.LineEngine
         bool m_Pause = false;
         bool m_Moveable = true;
         bool m_Active = true;
+        bool m_ActiveDependent;
+        bool m_DirectConnection;
+        bool m_Parent;
         #endregion
         #region Properties
         public float FrameTime { get { return m_FrameTime; } }
@@ -41,6 +48,19 @@ namespace Asteroids.LineEngine
             set
             {
                 m_RotationInRadians = value;
+            }
+        }
+
+        public float ReletiveRotation
+        {
+            get
+            {
+                return m_ReletiveRotation;
+            }
+
+            set
+            {
+                m_ReletiveRotation = value;
             }
         }
 
@@ -95,6 +115,15 @@ namespace Asteroids.LineEngine
                 m_Radius = value;
             }
         }
+
+        public bool Parent
+        {
+            set
+            {
+                m_Parent = value;
+            }
+        }
+
 
         public bool Hit
         {
@@ -161,6 +190,33 @@ namespace Asteroids.LineEngine
             }
         }
 
+        public bool ActiveDependent
+        {
+            get
+            {
+                return m_ActiveDependent;
+            }
+
+            set
+            {
+                m_ActiveDependent = value;
+            }
+        }
+
+        public bool DirectConnection
+        {
+            get
+            {
+                return m_DirectConnection;
+            }
+
+            set
+            {
+                m_DirectConnection = value;
+            }
+        }
+
+
         #endregion
         #region Constructor
         /// <summary>
@@ -171,6 +227,7 @@ namespace Asteroids.LineEngine
         {
             game.Components.Add(this);
             m_Game = game;
+            Children = new List<PositionedObject>();
         }
         #endregion
         #region Public Methods
@@ -180,21 +237,50 @@ namespace Asteroids.LineEngine
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         public override void Update(GameTime gameTime)
         {
-            if (Active && Moveable)
+            if (Active)
             {
-                base.Update(gameTime);
-                m_FrameTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
-                Velocity += Acceleration * m_FrameTime;
-                Position += Velocity * m_FrameTime;
-                RotationVelocity += RotationAcceleration * m_FrameTime;
-                RotationInRadians += RotationVelocity * m_FrameTime;
+                if (Moveable)
+                {
+                    base.Update(gameTime);
 
-                if (RotationInRadians > MathHelper.TwoPi)
-                    RotationInRadians = 0;
+                    m_FrameTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
+                    Velocity += Acceleration * m_FrameTime;
+                    Position += Velocity * m_FrameTime;
+                    RotationVelocity += RotationAcceleration * m_FrameTime;
+                    RotationInRadians += RotationVelocity * m_FrameTime;
 
-                if (RotationInRadians < 0)
-                    RotationInRadians = MathHelper.TwoPi;
+                    if (RotationInRadians > MathHelper.TwoPi)
+                        RotationInRadians = 0;
+
+                    if (RotationInRadians < 0)
+                        RotationInRadians = MathHelper.TwoPi;
+                }
             }
+
+                if (m_Parent)
+                {
+                    foreach (PositionedObject child in Children)
+                    {
+                    if (Active)
+                    {
+                        if (child.DirectConnection)
+                        {
+                            child.Position = Position;
+                            child.RotationInRadians = RotationInRadians;
+                        }
+                        else
+                        {
+                            child.Position = Vector3.Transform(child.ReletivePosition,
+                                Matrix.CreateRotationZ(RotationInRadians));
+                            child.Position += Position;
+                            child.RotationInRadians = RotationInRadians + child.ReletiveRotation;
+                        }
+                    }
+
+                        if (child.ActiveDependent)
+                            child.Active = Active;
+                    }
+                }
         }
 
         public override void Initialize()
@@ -203,6 +289,19 @@ namespace Asteroids.LineEngine
 
             m_MaxWidth = Services.WindowWidth * 0.5f;
             m_MaxHeight = Services.WindowHeight * 0.5f;
+        }
+
+        public virtual void BeginRun()
+        {
+
+        }
+
+        public void AddChild(PositionedObject child, bool activeDependent, bool directConnection)
+        {
+            Children.Add(child);
+            Children[Children.Count - 1].ActiveDependent = activeDependent;
+            Children[Children.Count - 1].DirectConnection = directConnection;
+            m_Parent = true;
         }
 
         public void Remove()

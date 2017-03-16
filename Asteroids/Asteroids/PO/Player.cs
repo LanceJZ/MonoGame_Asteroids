@@ -105,6 +105,9 @@ namespace Asteroids
             m_Explosion = new LineExplode(game);
             m_HighScoreList = new HighScores(game);
 
+            AddChild(m_Flame, false, true);
+            AddChild(m_Ship, true, true);
+
             for (int i = 0; i < 4; i++)
             {
                 MakeShipLives(i);
@@ -126,9 +129,9 @@ namespace Asteroids
         /// <summary>
         /// Executed after initialization is complete
         /// </summary>
-        public void BeginRun()
+        public override void BeginRun()
         {
-            m_Ship.Active = false;
+            Active = false;
             m_Flame.Active = false;
             Radius = m_Ship.Radius;
             ShipLivesDisplay();
@@ -157,7 +160,6 @@ namespace Asteroids
                 if (!GameOver)
                 {
                     Active = true;
-                    m_Ship.Active = true;
                     m_Spawn = false;
                 }
             }
@@ -172,22 +174,6 @@ namespace Asteroids
 
                 CheckBorders();
                 KeyInput();
-                m_Flame.Position = Position;
-                m_Flame.RotationInRadians = RotationInRadians;
-                m_Ship.Position = Position;
-                m_Ship.RotationInRadians = RotationInRadians;
-            }
-        }
-
-        public void CheckCollision()
-        {
-            if (m_UFO.Shot.Active)
-            {
-                if (CirclesIntersect(m_UFO.Shot.Position, m_UFO.Shot.Radius))
-                {
-                    m_UFO.Shot.Active = false;
-                    Hit = true;
-                }
             }
         }
 
@@ -218,7 +204,6 @@ namespace Asteroids
             m_Score = 0;
             m_NextBonusLife = m_BaseBonusLife;
             Active = true;
-            m_Ship.Active = true;
             ResetShip();
             SetScore(0);
             m_HighScoreList.NewGame();
@@ -244,6 +229,8 @@ namespace Asteroids
 
         void Explode()
         {
+            m_Flame.Active = false;
+            Active = false;
             m_Explode.Play(0.5f, 0, 0);
             m_Explosion.Spawn(Position, Radius);
             m_Exploding = true;
@@ -253,8 +240,6 @@ namespace Asteroids
         {
             m_Lives--;
             Active = false;
-            m_Ship.Active = false;
-            m_Flame.Active = false;
             m_Spawn = false;
 
             if (m_Lives < 1)
@@ -306,10 +291,15 @@ namespace Asteroids
             {
                 m_FlameTimer.Reset();
 
-                if (m_Flame.Active)
-                    m_Flame.Active = false;
+                if (Active)
+                {
+                    if (m_Flame.Active)
+                        m_Flame.Active = false;
+                    else
+                        m_Flame.Active = true;
+                }
                 else
-                    m_Flame.Active = true;
+                    m_Flame.Active = false;
             }
 
             if (m_ThrustTimer.Seconds > m_ThrustTimer.Amount)

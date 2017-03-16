@@ -33,6 +33,12 @@ namespace Asteroids.LineEngine
 
             Services.AddDrawableComponent(this);
 
+            InitializeLineMesh();
+        }
+
+        protected virtual void InitializeLineMesh()
+        {
+
         }
 
         public override void Update(GameTime gameTime)

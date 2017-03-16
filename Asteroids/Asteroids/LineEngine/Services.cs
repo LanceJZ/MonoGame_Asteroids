@@ -158,7 +158,7 @@ namespace Asteroids.LineEngine
                 m_ScreenSize = new Vector2(graphics.PreferredBackBufferWidth, graphics.PreferredBackBufferHeight);
                 //Create the Engine Services
                 m_Instance = new Services(game);
-                m_RandomNumber = new Random();
+                m_RandomNumber = new Random(DateTime.Now.Millisecond);
                 //Set View Matrix and Projection Matrix
                 m_ViewMatrix = Matrix.CreateLookAt(new Vector3(0.0f, 0.0f, 1f), Vector3.Zero, Vector3.Up);
                 m_ProjectionMatrix = Matrix.CreateOrthographic(m_ScreenSize.X, m_ScreenSize.Y, 1, 2);
@@ -207,20 +207,62 @@ namespace Asteroids.LineEngine
 
         public static Vector3 SetRandomVelocity(float speed)
         {
-            float rad = RandomRadian();
+            float ang = RandomRadian();
             float amt = Services.RandomMinMax(speed * 0.15f, speed);
-            return new Vector3((float)Math.Cos(rad) * amt, (float)Math.Sin(rad) * amt, 0);
+            return SetVelocityFromAngle(ang, amt);
         }
 
         public static Vector3 SetRandomVelocity(float speed, float radianDirection)
         {
             float amt = Services.RandomMinMax(speed * 0.15f, speed);
-            return new Vector3((float)Math.Cos(radianDirection) * amt, (float)Math.Sin(radianDirection) * amt, 0);
+            return SetVelocityFromAngle(radianDirection, amt);
+        }
+
+        public static Vector3 SetVelocityFromAngle(float rotation, float magnitude)
+        {
+            return new Vector3((float)Math.Cos(rotation) * magnitude, (float)Math.Sin(rotation) * magnitude, 0);
+        }
+
+        public static Vector3 SetVelocityFromAngle(float magnitude)
+        {
+            float ang = RandomRadian();
+            return new Vector3((float)Math.Cos(ang) * magnitude, (float)Math.Sin(ang) * magnitude, 0);
         }
 
         public static Vector3 SetRandomEdge()
         {
             return new Vector3(WindowWidth * 0.5f, RandomMinMax(-Services.WindowHeight * 0.45f, Services.WindowHeight * 0.45f), 0);
+        }
+
+        public static float AimAtTarget(Vector3 origin, Vector3 target, float facingAngle)
+        {
+            float turnVelocity = 0;
+            float targetAngle = AngleFromVectors(origin, target);
+            float targetLessFacing = targetAngle - facingAngle;
+            float facingLessTarget = facingAngle - targetAngle;
+
+            if (Math.Abs(targetLessFacing) > Math.PI)
+            {
+                if (facingAngle > targetAngle)
+                {
+                    facingLessTarget = ((MathHelper.TwoPi - facingAngle) + targetAngle) * -1;
+                }
+                else
+                {
+                    facingLessTarget = (MathHelper.TwoPi - targetAngle) + facingAngle;
+                }
+            }
+
+            if (facingLessTarget > 0)
+            {
+                turnVelocity = -0.5f;
+            }
+            else
+            {
+                turnVelocity = 0.5f;
+            }
+
+            return turnVelocity;
         }
         #endregion
     }
