@@ -207,6 +207,7 @@ namespace Asteroids
             ResetShip();
             SetScore(0);
             m_HighScoreList.NewGame();
+            ShipLivesDisplay();
         }
 
         public void LoadSounds(SoundEffect fireshot, SoundEffect explode, SoundEffect bonus, SoundEffect thurst)
