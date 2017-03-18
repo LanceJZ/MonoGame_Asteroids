@@ -2,7 +2,7 @@
 
 namespace Asteroids
 {
-    public class PlayerShip : LineEngine.LineMesh
+    public class PlayerShip : VectorEngine.Vector
     {
         public PlayerShip(Game game) : base(game)
         {
@@ -30,9 +30,7 @@ namespace Asteroids
             pointPosition[4] = new Vector3(-10.6f, 4.7f, 0);//Top inside back.
             pointPosition[5] = new Vector3(-13.5f, 9.4f, 0);//Top Back Tip.
 
-            InitializePoints(pointPosition);
-
-            Radius = 13.5f;
+            Radius = InitializePoints(pointPosition);
         }
     }
 }

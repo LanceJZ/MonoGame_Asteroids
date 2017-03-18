@@ -7,9 +7,9 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 #endregion
 
-namespace Asteroids.LineEngine
+namespace Asteroids.VectorEngine
 {
-    public class LineMesh : PositionedObject, IDrawComponent
+    public class Vector : PositionedObject, IDrawComponent
     {
         Matrix m_LocalMatrix;
         VertexPositionColor[] m_PointList;
@@ -18,7 +18,7 @@ namespace Asteroids.LineEngine
         short[] m_LineListIndices;
         bool m_Initialized = false;
 
-        public LineMesh (Game game) : base(game)
+        public Vector (Game game) : base(game)
         {
         }
 
@@ -78,8 +78,10 @@ namespace Asteroids.LineEngine
         /// <summary>
         /// Initializes the point list.
         /// </summary>
-        public void InitializePoints(Vector3[] pointPosition)
+        public float InitializePoints(Vector3[] pointPosition)
         {
+            float radius = 0;
+
             if (!m_Initialized)
             {
                 m_Initialized = true;
@@ -108,12 +110,23 @@ namespace Asteroids.LineEngine
                 InitializeEffect();
                 Transform();
             }
+
+            for (int i = 0; i < pointPosition.Length; i++)
+            {
+                if (Math.Abs(pointPosition[i].X) > radius)
+                    radius = Math.Abs(pointPosition[i].X);
+
+                if (Math.Abs(pointPosition[i].Y) > radius)
+                    radius = Math.Abs(pointPosition[i].Y);
+            }
+
+            return radius;
         }
 
         void Transform()
         {
             // Calculate the mesh transformation by combining translation, rotation, and scaling
-            m_LocalMatrix = Matrix.CreateScale(ScalePercent) * Matrix.CreateFromYawPitchRoll(0, 0, RotationInRadians)
+            m_LocalMatrix = Matrix.CreateScale(Scale) * Matrix.CreateFromYawPitchRoll(0, 0, RotationInRadians)
                 * Matrix.CreateTranslation(Position);
             // Apply to Effect
             Services.BasicEffect.World = m_LocalMatrix;

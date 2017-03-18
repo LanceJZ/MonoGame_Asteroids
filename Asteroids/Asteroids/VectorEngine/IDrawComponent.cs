@@ -1,7 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace Asteroids.LineEngine
+namespace Asteroids.VectorEngine
 {
     public interface IDrawComponent
     {

@@ -3,7 +3,7 @@ using Microsoft.Xna.Framework;
 
 namespace Asteroids
 {
-    using serv = LineEngine.Services;
+    using serv = VectorEngine.Services;
 
     public class Explode : GameComponent
     {

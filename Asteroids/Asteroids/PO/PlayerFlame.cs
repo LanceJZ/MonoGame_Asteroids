@@ -2,7 +2,7 @@
 
 namespace Asteroids
 {
-    public class PlayerFlame : LineEngine.LineMesh
+    public class PlayerFlame : VectorEngine.Vector
     {
         public PlayerFlame(Game game) : base(game)
         {

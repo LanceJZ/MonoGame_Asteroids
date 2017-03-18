@@ -2,15 +2,15 @@
 
 namespace Asteroids
 {
-    using serv = LineEngine.Services;
+    using serv = VectorEngine.Services;
 
-    public class Dot : LineEngine.LineMesh
+    public class Dot : VectorEngine.Vector
     {
-        LineEngine.Timer m_LifeTimer;
+        VectorEngine.Timer m_LifeTimer;
 
         public Dot(Game game) : base(game)
         {
-            m_LifeTimer = new LineEngine.Timer(game);
+            m_LifeTimer = new VectorEngine.Timer(game);
         }
 
         public override void Update(GameTime gameTime)

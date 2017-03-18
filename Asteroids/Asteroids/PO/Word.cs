@@ -9,14 +9,14 @@ namespace Asteroids
         public bool[] Lines;
     };
 
-    public class Word : LineEngine.PositionedObject
+    public class Word : VectorEngine.PositionedObject
     {
         Game m_Game;
         WordData[] Letters = new WordData[27];
         Vector3[] m_LetterLineStart = new Vector3[16];
         Vector3[] m_LetterLineEnd = new Vector3[16];
-        public List<LineEngine.PositionedObject> m_Words;
-        public List<LineEngine.LineMesh> m_EachLine;
+        public List<VectorEngine.PositionedObject> m_Words;
+        public List<VectorEngine.Vector> m_EachLine;
 
         public Word(Game game) : base(game)
         {
@@ -33,8 +33,8 @@ namespace Asteroids
             }
 
             InitializeWordLines();
-            m_Words = new List<LineEngine.PositionedObject>();
-            m_EachLine = new List<LineEngine.LineMesh>();
+            m_Words = new List<VectorEngine.PositionedObject>();
+            m_EachLine = new List<VectorEngine.Vector>();
         }
 
         public void ProcessWords(string words, Vector3 locationStart, float size)
@@ -81,7 +81,7 @@ namespace Asteroids
                     letterLine[0] = new Vector3(Xstart, Ystart, 0);
                     letterLine[1] = new Vector3(Xend, Yend, 0);
 
-                    m_EachLine.Add(new LineEngine.LineMesh(m_Game));
+                    m_EachLine.Add(new VectorEngine.Vector(m_Game));
                     m_EachLine[m_EachLine.Count - 1].Position = Position + new Vector3(location, 0, 0);
                     m_EachLine[m_EachLine.Count - 1].InitializePoints(letterLine);
                     m_EachLine[m_EachLine.Count - 1].Moveable = false;
@@ -96,7 +96,7 @@ namespace Asteroids
 
             if (m_EachLine.Count > 0)
             {
-                foreach (LineEngine.LineMesh line in m_EachLine)
+                foreach (VectorEngine.Vector line in m_EachLine)
                 {
                     line.Active = false;
                     line.Enabled = false;
@@ -112,7 +112,7 @@ namespace Asteroids
         {
             if (m_EachLine != null)
             {
-                foreach (LineEngine.LineMesh line in m_EachLine)
+                foreach (VectorEngine.Vector line in m_EachLine)
                 {
                     line.Active = false;
                     line.Enabled = false;                    
@@ -126,7 +126,7 @@ namespace Asteroids
         {
             if (m_EachLine != null)
             {
-                foreach (LineEngine.LineMesh line in m_EachLine)
+                foreach (VectorEngine.Vector line in m_EachLine)
                 {
                     line.Active = true;
                     line.Enabled = true;

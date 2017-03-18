@@ -2,13 +2,13 @@
 
 namespace Asteroids
 {
-    public class Shot : LineEngine.LineMesh
+    public class Shot : VectorEngine.Vector
     {
-        LineEngine.Timer m_LifeTimer;
+        VectorEngine.Timer m_LifeTimer;
 
         public Shot(Game game) : base(game)
         {
-            m_LifeTimer = new LineEngine.Timer(game);
+            m_LifeTimer = new VectorEngine.Timer(game);
         }
 
         public override void Initialize()
@@ -50,10 +50,9 @@ namespace Asteroids
             pointPosition[2] = new Vector3(0.5f, 0.5f, 0);
             pointPosition[3] = new Vector3(-0.5f, -0.5f, 0);
 
-            InitializePoints(pointPosition);
+            Radius = InitializePoints(pointPosition);
 
             Active = false;
-            Radius = 0.5f;
         }
     }
 }

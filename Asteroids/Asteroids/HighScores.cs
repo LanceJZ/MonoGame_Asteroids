@@ -9,8 +9,8 @@ using System.Text;
 
 namespace Asteroids
 {
-    using Serv = LineEngine.Services;
-    using Timer = LineEngine.Timer;
+    using Serv = VectorEngine.Services;
+    using Timer = VectorEngine.Timer;
 
     struct HighScoreListLines
     {
@@ -244,7 +244,7 @@ namespace Asteroids
                 UpdateHighScoreList();
             }
 
-            m_HighScoreHUD.ProcessWords("HIGH SCORES", new Vector3(0, LineEngine.Services.WindowHeight * 0.5f - 140, 0), 12);
+            m_HighScoreHUD.ProcessWords("HIGH SCORES", new Vector3(0, VectorEngine.Services.WindowHeight * 0.5f - 140, 0), 12);
             m_GameOverHUD.ProcessWords("GAME OVER", new Vector3(0, (Serv.WindowHeight * 0.5f) * 0.3666f, 0), 14);
             m_GameOverHUD.HideWords();
             m_PushStartHUD.ProcessWords("PUSH START", new Vector3(0, (Serv.WindowHeight * 0.5f) * 0.666f, 0), 12);
@@ -379,7 +379,7 @@ namespace Asteroids
 
             if (!m_KeyDownDown)
             {
-                if (Keyboard.GetState().IsKeyDown(Keys.Down) || Keyboard.GetState().IsKeyDown(Keys.LeftControl))
+                if (Keyboard.GetState().IsKeyDown(Keys.Down) || Keyboard.GetState().IsKeyDown(Keys.RightShift))
                 {
                     m_KeyDownDown = true;
                     m_HighScoreSelector++;

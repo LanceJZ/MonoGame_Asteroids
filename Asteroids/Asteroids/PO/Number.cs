@@ -9,14 +9,14 @@ namespace Asteroids
         public bool[] Lines;
     };
 
-    public class Number : LineEngine.PositionedObject
+    public class Number : VectorEngine.PositionedObject
     {
         Game m_Game;
         NumberData[] Numbers = new NumberData[10];
         Vector3[] m_NumberLineStart = new Vector3[7];
         Vector3[] m_NumberLineEnd = new Vector3[7];
-        public List<LineEngine.PositionedObject> m_Numbers;
-        List<LineEngine.LineMesh> m_EachLine;
+        public List<VectorEngine.PositionedObject> m_Numbers;
+        List<VectorEngine.Vector> m_EachLine;
 
         public Number(Game game) : base(game)
         {
@@ -33,8 +33,8 @@ namespace Asteroids
             }
 
             InitializeNumberLines();
-            m_Numbers = new List<LineEngine.PositionedObject>();
-            m_EachLine = new List<LineEngine.LineMesh>();
+            m_Numbers = new List<VectorEngine.PositionedObject>();
+            m_EachLine = new List<VectorEngine.Vector>();
         }
 
         public void ProcessNumber(int number, Vector3 locationStart, float size)
@@ -77,7 +77,7 @@ namespace Asteroids
                         numberLine[0] = new Vector3(Xstart, Ystart, 0);
                         numberLine[1] = new Vector3(Xend, Yend, 0);
 
-                        m_EachLine.Add(new LineEngine.LineMesh(m_Game));
+                        m_EachLine.Add(new VectorEngine.Vector(m_Game));
                         m_EachLine[m_EachLine.Count - 1].Position = Position - new Vector3(location, 0, 0);
                         m_EachLine[m_EachLine.Count - 1].InitializePoints(numberLine);
                         m_EachLine[m_EachLine.Count - 1].Moveable = false;
@@ -93,7 +93,7 @@ namespace Asteroids
 
             if (m_EachLine.Count > 0)
             {
-                foreach (LineEngine.LineMesh line in m_EachLine)
+                foreach (VectorEngine.Vector line in m_EachLine)
                 {
                     line.Active = false;
                     line.Enabled = false;
@@ -109,7 +109,7 @@ namespace Asteroids
         {
             if (m_EachLine != null)
             {
-                foreach (LineEngine.LineMesh num in m_EachLine)
+                foreach (VectorEngine.Vector num in m_EachLine)
                 {
                     num.Active = false;
                 }
@@ -122,7 +122,7 @@ namespace Asteroids
         {
             if (m_EachLine != null)
             {
-                foreach (LineEngine.LineMesh num in m_EachLine)
+                foreach (VectorEngine.Vector num in m_EachLine)
                 {
                     num.Active = true;
                 }

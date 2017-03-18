@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
 
-namespace Asteroids.LineEngine
+namespace Asteroids.VectorEngine
 {
     class Timer : GameComponent
     {

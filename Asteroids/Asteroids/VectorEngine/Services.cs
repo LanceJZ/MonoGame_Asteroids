@@ -6,7 +6,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Content;
 #endregion
 
-namespace Asteroids.LineEngine
+namespace Asteroids.VectorEngine
 {
     public sealed class Services : DrawableGameComponent
     {

@@ -44,11 +44,11 @@
   <ItemGroup>
     <Compile Include="Game.cs" />
     <Compile Include="HighScores.cs" />
-    <Compile Include="LineEngine\IDrawComponent.cs" />
-    <Compile Include="LineEngine\LineMesh.cs" />
-    <Compile Include="LineEngine\PositionedObject.cs" />
-    <Compile Include="LineEngine\Services.cs" />
-    <Compile Include="LineEngine\Timer.cs" />
+    <Compile Include="VectorEngine\IDrawComponent.cs" />
+    <Compile Include="VectorEngine\Vector.cs" />
+    <Compile Include="VectorEngine\PositionedObject.cs" />
+    <Compile Include="VectorEngine\Services.cs" />
+    <Compile Include="VectorEngine\Timer.cs" />
     <Compile Include="PO\Dot.cs" />
     <Compile Include="PO\Explode.cs" />
     <Compile Include="PO\Line.cs" />

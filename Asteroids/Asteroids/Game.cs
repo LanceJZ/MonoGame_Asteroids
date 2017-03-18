@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 
 namespace Asteroids
 {
-    using Serv = LineEngine.Services;
-    using Timer = LineEngine.Timer;
-    using PO = LineEngine.PositionedObject;
+    using Serv = VectorEngine.Services;
+    using Timer = VectorEngine.Timer;
+    using PO = VectorEngine.PositionedObject;
     /// <summary>
     /// After 40,000 points only small UFOs spawn.
     /// A steadily decreasing timer that shortens intervals between saucer spawns on each UFO.
@@ -418,10 +418,7 @@ namespace Asteroids
                 {
                     int rock = m_LargeRocks.Count;
                     m_LargeRocks.Add(new Rock(this));
-                    m_LargeRocks[rock].Player = m_Player;
-                    m_LargeRocks[rock].UFO = m_UFO;
-                    m_LargeRocks[rock].Spawn();
-                    m_LargeRocks[rock].Position = Serv.SetRandomEdge();
+                    m_LargeRocks[rock].Spawn(m_Player, m_UFO);
                     m_LargeRocks[rock].LoadSound(m_RockExplode);
                 }
             }

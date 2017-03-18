@@ -4,14 +4,14 @@ using Microsoft.Xna.Framework.Audio;
 
 namespace Asteroids
 {
-    using Serv = LineEngine.Services;
-    using Timer = LineEngine.Timer;
+    using Serv = VectorEngine.Services;
+    using Timer = VectorEngine.Timer;
     /// <summary>
     /// As the player's score increases, the angle range of the shots from the small saucer diminishes
     /// until the saucer fires extremely accurately.
     /// The small saucer will fire immediately when spawned. (Revision 3 of original arcade.)
     /// </summary>
-    public class UFO : LineEngine.LineMesh
+    public class UFO : VectorEngine.Vector
     {
         Player m_Player;
         Shot m_Shot;
@@ -25,6 +25,7 @@ namespace Asteroids
         SoundEffect m_Small;
         SoundEffect m_FireShot;
         float m_Speed = 66;
+        float m_Radius;
         int m_Points;
         int m_PlayerScore;
         bool m_SmallSoucer;
@@ -146,15 +147,16 @@ namespace Asteroids
             {
                 m_SmallSoucer = false;
                 m_Points = 200;
-                ScalePercent = 1;
+                Scale = 1;
             }
             else
             {
                 m_SmallSoucer = true;
                 m_Points = 1000;
-                ScalePercent = 0.5f;
+                Scale = 0.5f;
             }
 
+            Radius = m_Radius * Scale;
             Position.Y = Serv.RandomMinMax(-Serv.WindowHeight * 0.25f, Serv.WindowHeight * 0.25f);
 
             if (Serv.RandomMinMax(0, 10) > 5)
@@ -182,27 +184,11 @@ namespace Asteroids
         {
             if (m_Player.Active)
             {
-                if (Active)
+                if (CirclesIntersect(m_Player.Position, m_Player.Radius))
                 {
-                    if (CirclesIntersect(m_Player.Position, m_Player.Radius))
-                    {
-                        Explode();
-                        m_Player.Hit = true;
-                        m_Player.SetScore(m_Points);
-                    }
-
-                    for (int i = 0; i < 4; i++)
-                    {
-                        if (m_Player.Shots[i].Active)
-                        {
-                            if (CirclesIntersect(m_Player.Shots[i].Position, m_Player.Shots[i].Radius))
-                            {
-                                m_Player.Shots[i].Active = false;
-                                m_Player.SetScore(m_Points);
-                                Explode();
-                            }
-                        }
-                    }
+                    Explode();
+                    m_Player.Hit = true;
+                    m_Player.SetScore(m_Points);
                 }
 
                 if (m_Shot.Active)
@@ -214,6 +200,20 @@ namespace Asteroids
                     }
                 }
             }
+
+            for (int i = 0; i < 4; i++)
+            {
+                if (m_Player.Shots[i].Active)
+                {
+                    if (CirclesIntersect(m_Player.Shots[i].Position, m_Player.Shots[i].Radius))
+                    {
+                        m_Player.Shots[i].Active = false;
+                        m_Player.SetScore(m_Points);
+                        Explode();
+                    }
+                }
+            }
+
         }
 
         void TimeToShotYet()
@@ -291,8 +291,7 @@ namespace Asteroids
             pointPosition[10] = new Vector3(-22.3f, -4.7f, 0);// Lower inside left
             pointPosition[11] = new Vector3(22.3f, -4.7f, 0);// Lower inside Right
 
-            InitializePoints(pointPosition);
-            Radius = 22.3f;
+            m_Radius = InitializePoints(pointPosition);
         }
     }
 }

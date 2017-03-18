@@ -6,10 +6,10 @@ using Microsoft.Xna.Framework.Audio;
 
 namespace Asteroids
 {
-    using Serv = LineEngine.Services;
-    using Timer = LineEngine.Timer;
+    using Serv = VectorEngine.Services;
+    using Timer = VectorEngine.Timer;
 
-    public class Player : LineEngine.PositionedObject
+    public class Player : VectorEngine.PositionedObject
     {
         Game m_Game;
         Timer m_FlameTimer;
@@ -225,7 +225,7 @@ namespace Asteroids
             m_ShipLives.Add(new PlayerShip(m_Game));
             m_ShipLives[count].Position = new Vector3((-count * 15) + -400, 400, 0);
             m_ShipLives[count].RotationInRadians = (float)Math.PI * 0.5f;
-            m_ShipLives[count].ScalePercent = 0.5f;
+            m_ShipLives[count].Scale = 0.5f;
         }
 
         void Explode()
@@ -294,10 +294,7 @@ namespace Asteroids
 
                 if (Active)
                 {
-                    if (m_Flame.Active)
-                        m_Flame.Active = false;
-                    else
-                        m_Flame.Active = true;
+                    m_Flame.Active = !m_Flame.Active;
                 }
                 else
                     m_Flame.Active = false;
