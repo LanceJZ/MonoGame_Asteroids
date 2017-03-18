@@ -129,8 +129,9 @@ namespace Asteroids
                 CheckBorders();
                 TimeToChangeVectorYet();
                 TimeToShotYet();
-                CheckColusion();
             }
+
+            CheckColusion();
         }
 
         public void Spawn(int SpawnCount, int Wave)
@@ -184,11 +185,14 @@ namespace Asteroids
         {
             if (m_Player.Active)
             {
-                if (CirclesIntersect(m_Player.Position, m_Player.Radius))
+                if (Active)
                 {
-                    Explode();
-                    m_Player.Hit = true;
-                    m_Player.SetScore(m_Points);
+                    if (CirclesIntersect(m_Player.Position, m_Player.Radius))
+                    {
+                        Explode();
+                        m_Player.Hit = true;
+                        m_Player.SetScore(m_Points);
+                    }
                 }
 
                 if (m_Shot.Active)
